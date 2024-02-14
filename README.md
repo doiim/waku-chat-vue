@@ -13,26 +13,10 @@ This project was bootstrapped with [Vue CLI](https://cli.vuejs.org/).
 First clone this repo, install dependencies in the project root and build the project.
 
 ```sh
-$ git clone https://github.com/filipesoccol/libp2p-pubsub-vue
-$ cd libp2p-pubsub-vue
+$ git clone https://github.com/doiim/waku-chat-vue.git
+$ cd waku-chat-vue
 $ npm install
 $ npm run dev
 ```
 
-## Installation and running Relay
-
-```sh
-$ git clone https://github.com/filipesoccol/libp2p-pubsub-vue
-$ cd libp2p-pubsub-vue
-$ npm install
-$ node relay
-```
-
-### Signaling Servers are important
-
-Verify signaling servers in case two peers not seen each other.
-[Check here](https://github.com/filipesoccol/libp2p-pubsub-vue/blob/c4f92ebefdb6750f5ec0ab883c8a738d76b23f9a/src/plugins/vue-libp2p.js#L17)
-
-### Customize configuration
-
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## Consider running your own node for Waku network

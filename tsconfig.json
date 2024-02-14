@@ -10,10 +10,10 @@
         ],
         "skipLibCheck": true,
         /* Bundler mode */
-        "moduleResolution": "node",
+        "moduleResolution": "Node",
         "allowImportingTsExtensions": true,
         "resolveJsonModule": true,
-        "isolatedModules": true,
+        "isolatedModules": false,
         "noEmit": true,
         "jsx": "preserve",
         /* Linting */

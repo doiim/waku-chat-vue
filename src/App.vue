@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import IpfsInfo from "./components/IpfsInfo.vue";
+import WakuChat from "./components/WakuChat.vue";
 </script>
 
 <template>
   <div id="app">
-    <img id="libp2p-logo" alt="IPFS logo" src="./assets/libp2p-logo.png" />
-    <IpfsInfo />
+    <img id="libp2p-logo" alt="IPFS logo" src="./assets/waku-logo.svg" />
+    <WakuChat />
   </div>
 </template>
 
@@ -27,5 +27,9 @@ body {
 #libp2p-logo {
   height: 10rem;
   margin: 24px;
+}
+img {
+  background-color: black;
+  border-radius: 100%;
 }
 </style>

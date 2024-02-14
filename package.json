@@ -1,9 +1,8 @@
 {
-  "name": "libp2p-pubsub-vue",
-  "homepage": "https://filipesoccol.github.io/libp2p-pubsub-vue/",
-  "version": "2.0.0",
+  "name": "waku-chat-vue",
+  "homepage": "https://doiim.github.io/waku-chat-vue/",
+  "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --skipLibCheck && vite build",
@@ -11,22 +10,9 @@
     "deploy": "vite build && gh-pages -d dist"
   },
   "dependencies": {
-    "@chainsafe/libp2p-gossipsub": "^11.2.0",
-    "@chainsafe/libp2p-noise": "^15.0.0",
-    "@chainsafe/libp2p-yamux": "^6.0.1",
-    "@libp2p/bootstrap": "^10.0.13",
-    "@libp2p/circuit-relay-v2": "^1.0.13",
-    "@libp2p/dcutr": "^1.0.10",
-    "@libp2p/floodsub": "^9.0.9",
-    "@libp2p/identify": "^1.0.12",
-    "@libp2p/mplex": "^10.0.13",
-    "@libp2p/peer-id-factory": "^4.0.5",
-    "@libp2p/pubsub-peer-discovery": "^10.0.2",
-    "@libp2p/tcp": "^9.0.13",
-    "@libp2p/webrtc": "^4.0.17",
-    "@libp2p/websockets": "^8.0.13",
-    "@multiformats/multiaddr": "^12.1.14",
-    "libp2p": "^1.2.1",
+    "@libp2p/interfaces": "^3.3.2",
+    "@waku/sdk": "^0.0.22",
+    "protobufjs": "^7.2.6",
     "vue": "^3.4.15"
   },
   "devDependencies": {
