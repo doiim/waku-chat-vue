@@ -3,16 +3,11 @@ import {
   createLightNode,
   waitForRemotePeer,
   createDecoder,
-  createEncoder,
-  Protocols
+  createEncoder
 } from "@waku/sdk";
 
-interface Options {
-  proxyMultiaddrs: string
-}
-
 const plugin = {
-  install: async (app: any, options: Options) => {
+  install: async (app: any) => {
 
     const startWaku = async function () {
       // Create and start a Light Node
