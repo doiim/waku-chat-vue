@@ -4,7 +4,6 @@ import WakuChat from "./components/WakuChat.vue";
 
 <template>
   <div id="app">
-    <img id="libp2p-logo" alt="IPFS logo" src="./assets/waku-logo.svg" />
     <WakuChat />
   </div>
 </template>

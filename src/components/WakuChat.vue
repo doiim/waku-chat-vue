@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref, inject, onMounted, watch } from "vue";
+import { ref, inject, onMounted } from "vue";
 import * as protobuf from "protobufjs";
 import { LightNode, Encoder, Decoder } from "@waku/sdk";
+
+type Message = { author: string, type: string, data: { text: string } }
 
 const startWaku = inject("startWaku") as () => Promise<LightNode>;
 const ChatInterface = inject("chatInterface") as protobuf.Type;
@@ -10,9 +12,11 @@ const ChatDecoder = inject("chatDecoder") as Decoder;
 const id = ref<string>("");
 const status = ref<string>("Waku Connecting...");
 const isConnected = ref<boolean>(false);
-const message = ref<string>("");
-const messages = ref<string[]>([]);
-const messagesRef = ref<HTMLElement | null>(null);
+
+const typedMessage = ref<string>("");
+const isChatOpen = ref<boolean>(false);
+const newMessagesCount = ref<number>(0);
+const messageList = ref<Message[]>([])
 
 // Create the callback function
 const messageCallback = (wakuMessage: any) => {
@@ -20,38 +24,10 @@ const messageCallback = (wakuMessage: any) => {
   if (!wakuMessage.payload) return;
   // Render the messageObj as desired in your application
   const messageObj: any = ChatInterface.decode(wakuMessage.payload);
-  messages.value.push(
-    `${messageObj.sender.substring(
-      messageObj.sender.length - 5,
-      messageObj.sender.length
-    )} says: ${messageObj.message} at ${new Date(
-      messageObj.timestamp
-    ).toLocaleTimeString()}`
-  );
+  messageList.value = [...messageList.value, { author: messageObj.sender, type: 'message', data: { text: messageObj.message } }]
 };
 
-// watch works directly on a ref
-watch(
-  messages,
-  async () => {
-    setTimeout(() => {
-      if (messagesRef.value) {
-        console.log(
-          "scrolling",
-          messagesRef.value.scrollTop,
-          messagesRef.value.scrollHeight
-        );
-        messagesRef.value.scrollTo({
-          top: messagesRef.value.scrollHeight,
-          behavior: "smooth",
-        });
-      }
-    }, 300);
-  },
-  { deep: true }
-);
-
-let sendMessage = () => {};
+let sendMessageToServer = async () => { };
 
 onMounted(async () => {
   const n = await startWaku();
@@ -63,14 +39,14 @@ onMounted(async () => {
   // Subscribe to content topics and process new messages
   await n.filter.subscribe([ChatDecoder], messageCallback);
   isConnected.value = true;
-  sendMessage = async () => {
+  sendMessageToServer = async () => {
     if (!isConnected) return;
 
     // Create a new message object
     const protoMessage = ChatInterface.create({
       timestamp: Date.now(),
       sender: id.value,
-      message: message.value,
+      message: typedMessage.value,
     });
     // Serialise the message using Protobuf
     const serialisedMessage = ChatInterface.encode(protoMessage).finish();
@@ -79,40 +55,48 @@ onMounted(async () => {
     await n.lightPush.send(ChatEncoder, {
       payload: serialisedMessage,
     });
-    message.value = "";
+    typedMessage.value = "";
   };
 });
+
+const sendMessage = (msg: Message) => {
+  if (msg.data.text.length > 0) {
+    setTimeout(async () => {
+      newMessagesCount.value = isChatOpen ? newMessagesCount.value : newMessagesCount.value + 1
+      typedMessage.value = msg.data.text
+      await sendMessageToServer()
+      onMessageWasSent(msg)
+    }, 0);
+  }
+}
+
+const onMessageWasSent = (message: Message) => {
+  // called when the user sends a message
+  messageList.value = [...messageList.value, message]
+}
+const openChat = () => {
+  // called when the user clicks on the fab button to open the chat
+  if (!isConnected) return
+  isChatOpen.value = true
+  newMessagesCount.value = 0
+}
+
+const closeChat = () => {
+  isChatOpen.value = false
+}
+
 </script>
 
 <template>
-  <div class="ipfs-info">
-    <form v-if="isConnected" v-on:submit.prevent="sendMessage">
-      <div id="messages" ref="messagesRef" class="messages">
-        <p v-for="(m, idx) in messages" :key="idx">{{ m }}</p>
-      </div>
-      <input
-        size="50"
-        v-model="message"
-        placeholder="Write something and press enter."
-      /><br />
-      <input type="submit" />
-    </form>
-    <h4>{{ status }}</h4>
-    <h5>ID: {{ id }}</h5>
+  <div v-if="isConnected">
+    <BeautifulChat title="Chat Name" :participants="[id]" :isOpen="isChatOpen" :close="closeChat" :open="openChat"
+      :onMessageWasSent="sendMessage" :messageList="messageList" :showEmoji="true" :showFile="true" :showEdition="true"
+      :showDeletion="true" :deletionConfirmation="true" :showLauncher="true" :showCloseButton="true"
+      :disableUserListToggle="false" />
+  </div>
+  <div v-else>
+    WAIT CONNECT
   </div>
 </template>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.messages {
-  display: flex;
-  flex-direction: column;
-  flex-flow: column;
-  align-items: center;
-  overflow-y: scroll;
-  max-height: 300px;
-}
-.messages p {
-  max-width: 300px;
-}
-</style>
+<style scoped></style>
