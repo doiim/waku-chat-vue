@@ -3,7 +3,7 @@ import { ref, inject, onMounted } from "vue";
 import * as protobuf from "protobufjs";
 import { LightNode, Encoder, Decoder } from "@waku/sdk";
 
-type Message = { author: string, type: string, data: { text: string } }
+type Message = { author: string, type: string, data: { text?: string, emoji?: string } }
 
 const startWaku = inject("startWaku") as () => Promise<LightNode>;
 const ChatInterface = inject("chatInterface") as protobuf.Type;
@@ -60,14 +60,20 @@ onMounted(async () => {
 });
 
 const sendMessage = (msg: Message) => {
-  if (msg.data.text.length > 0) {
-    setTimeout(async () => {
-      newMessagesCount.value = isChatOpen ? newMessagesCount.value : newMessagesCount.value + 1
-      typedMessage.value = msg.data.text
-      await sendMessageToServer()
-      onMessageWasSent(msg)
-    }, 0);
+
+  let messageData = ''
+  if (msg.data.text && msg.data.text.length > 0) {
+    messageData = msg.data.text
+  } else if (msg.data.emoji && msg.data.emoji.length > 0) {
+    messageData = msg.data.emoji
   }
+
+  setTimeout(async () => {
+    newMessagesCount.value = isChatOpen ? newMessagesCount.value : newMessagesCount.value + 1
+    typedMessage.value = messageData
+    await sendMessageToServer()
+    onMessageWasSent(msg)
+  }, 0);
 }
 
 const onMessageWasSent = (message: Message) => {
@@ -89,7 +95,7 @@ const closeChat = () => {
 
 <template>
   <div v-if="isConnected">
-    <BeautifulChat title="Chat Name" :participants="[id]" :isOpen="isChatOpen" :close="closeChat" :open="openChat"
+    <BeautifulChat title="Doiim Chat" :participants="[id]" :isOpen="isChatOpen" :close="closeChat" :open="openChat"
       :onMessageWasSent="sendMessage" :messageList="messageList" :showEmoji="true" :showFile="true" :showEdition="true"
       :showDeletion="true" :deletionConfirmation="true" :showLauncher="true" :showCloseButton="true"
       :disableUserListToggle="false" />
