@@ -17,6 +17,7 @@ const typedMessage = ref<string>("");
 const isChatOpen = ref<boolean>(false);
 const newMessagesCount = ref<number>(0);
 const messageList = ref<Message[]>([])
+const participants = ref<string[]>([])
 
 // Create the callback function
 const messageCallback = (wakuMessage: any) => {
@@ -25,6 +26,11 @@ const messageCallback = (wakuMessage: any) => {
   // Render the messageObj as desired in your application
   const messageObj: any = ChatInterface.decode(wakuMessage.payload);
   messageList.value = [...messageList.value, { author: messageObj.sender, type: 'message', data: { text: messageObj.message } }]
+
+  for (let i = 0; i < participants.value.length; i++) {
+    if (participants.value[i] === messageObj.sender) return
+  }
+  participants.value = [...participants.value, messageObj.sender]
 };
 
 let sendMessageToServer = async () => { };
@@ -32,6 +38,7 @@ let sendMessageToServer = async () => { };
 onMounted(async () => {
   const n = await startWaku();
   id.value = n.libp2p.peerId.toString();
+  participants.value = [id.value]
   status.value = "Waku connected.";
 
   // Create a Filter subscription
@@ -95,9 +102,9 @@ const closeChat = () => {
 
 <template>
   <div v-if="isConnected">
-    <BeautifulChat title="Doiim Chat" :participants="[id]" :isOpen="isChatOpen" :close="closeChat" :open="openChat"
-      :onMessageWasSent="sendMessage" :messageList="messageList" :showEmoji="true" :showFile="true" :showEdition="true"
-      :showDeletion="true" :deletionConfirmation="true" :showLauncher="true" :showCloseButton="true"
+    <BeautifulChat title="Doiim Chat" :participants="participants" :isOpen="isChatOpen" :close="closeChat"
+      :open="openChat" :onMessageWasSent="sendMessage" :messageList="messageList" :showEmoji="true" :showFile="false"
+      :showEdition="true" :showDeletion="true" :deletionConfirmation="true" :showLauncher="true" :showCloseButton="true"
       :disableUserListToggle="false" />
   </div>
   <div v-else>
