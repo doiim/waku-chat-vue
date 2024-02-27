@@ -107,9 +107,44 @@ const closeChat = () => {
       :showEdition="true" :showDeletion="true" :deletionConfirmation="true" :showLauncher="true" :showCloseButton="true"
       :disableUserListToggle="false" />
   </div>
-  <div v-else>
-    WAIT CONNECT
+  <div v-else class="spinner">
+    <div></div>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.spinner {
+  width: 60px;
+  height: 60px;
+  background-color: black;
+  position: fixed;
+  right: 25px;
+  bottom: 25px;
+  border-radius: 50%;
+  box-shadow: none;
+  transition: box-shadow .2s ease-in-out;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner div {
+  width: 20px;
+  height: 20px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 5px solid white;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>
