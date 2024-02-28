@@ -3,7 +3,7 @@ import { ref, inject, onMounted, watchEffect } from "vue";
 import * as protobuf from "protobufjs";
 import { LightNode, Encoder, Decoder } from "@waku/sdk";
 
-type Message = { id: string, author: string, type: string, liked: boolean, data: { text?: string, emoji?: string }, room: string }
+type Message = { id: string, author: string, type: string, timestamp: number, liked: boolean, data: { text?: string, emoji?: string }, room: string }
 
 const startWaku = inject("startWaku") as () => Promise<LightNode>;
 const ChatInterface = inject("chatInterface") as protobuf.Type;
@@ -34,7 +34,8 @@ const messageCallback = (wakuMessage: any) => {
     type: messageObj.type,
     liked: false,
     room: messageObj.room,
-    data: { text: messageObj.message }
+    data: { text: messageObj.message },
+    timestamp: messageObj.timestamp
   }]
 
   for (let i = 0; i < participants.value.length; i++) {
@@ -46,7 +47,7 @@ const messageCallback = (wakuMessage: any) => {
   participants.value = [...participants.value, messageObj.sender]
 };
 
-let sendMessageToServer = async () => { };
+let sendMessageToServer = async (msg: Message) => { console.log(msg) };
 
 onMounted(async () => {
   const n = await startWaku();
@@ -59,16 +60,17 @@ onMounted(async () => {
   // Subscribe to content topics and process new messages
   await n.filter.subscribe([ChatDecoder], messageCallback);
   isConnected.value = true;
-  sendMessageToServer = async () => {
+  sendMessageToServer = async (msg: Message) => {
     if (!isConnected) return;
 
     // Create a new message object
     const protoMessage = ChatInterface.create({
-      timestamp: Date.now(),
-      author: id.value,
+      timestamp: msg.timestamp,
+      author: msg.author,
       message: typedMessage.value,
-      liked: false,
-      room: room
+      liked: msg.liked,
+      room: msg.room,
+      id: msg.id
     });
     // Serialise the message using Protobuf
     const serialisedMessage = ChatInterface.encode(protoMessage).finish();
@@ -85,6 +87,8 @@ const sendMessage = (msg: Message) => {
   msg.author = id.value
   msg.room = room.value
   msg.liked = false
+  msg.timestamp = Date.now()
+  msg.id = msg.author + msg.timestamp
 
   let messageData = ''
   if (msg.data.text && msg.data.text.length > 0) {
@@ -96,7 +100,7 @@ const sendMessage = (msg: Message) => {
   setTimeout(async () => {
     newMessagesCount.value = isChatOpen ? newMessagesCount.value : newMessagesCount.value + 1
     typedMessage.value = messageData
-    await sendMessageToServer()
+    await sendMessageToServer(msg)
     onMessageWasSent(msg)
   }, 0);
 }
@@ -123,12 +127,13 @@ const like = (id: string) => {
   messageList.value[m] = msg
 }
 
-const changeRoom = (newRoom: string) => {
-  room.value = newRoom+' '+id
+const changeRoom = (newRoom: string, e: MouseEvent) => {
+  e.stopPropagation();
+  room.value = newRoom + ' ' + id
 }
 
 const getUserName = (id: string) => {
-  let name = 'all'
+  let name = 'All'
   participants.value.forEach(participant => {
     if (participant.id === id)
       name = participant.name
@@ -152,12 +157,12 @@ watchEffect(() => {
       :disableUserListToggle="false">
       <template v-slot:header>
         {{ getUserName(room.split(' ')[0]) + ' room' }}
-        <button @click="changeRoom('All')">
+        <button @click="changeRoom('All', $event)">
           back to all
         </button>
       </template>
       <template v-slot:user-avatar="{ user }">
-        <button v-if="user && user.name" @click.prevent="changeRoom(user.id)">
+        <button v-if="user && user.name" @click="changeRoom(user.id, $event)">
           {{ user.name }}
         </button>
         <div>
