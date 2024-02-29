@@ -39,13 +39,16 @@ export const messageCallback = (wakuMessage: any) => {
 
 };
 
-export const changeRoom = (newRoom: string, e: MouseEvent) => {
-    e.stopPropagation();
-    if (newRoom === 'All') {
-        room.value = 'All'
-        return
-    }
-    room.value = (newRoom + ' ' + myInfo.value.id)
+export const changeRoom = (newRoom: string) => {
+    room.value = (newRoom)
+}
+
+export const privateRoom = (userId: string) => {
+    const myId = myInfo.value.id;
+    if (userId === myId)
+        room.value = userId
+    else
+        room.value = userId < myId ? userId + ' & ' + myId : myId + ' & ' + userId;
 }
 
 export let sendMessageToServer = async (msg: Message) => { console.log(msg) };
