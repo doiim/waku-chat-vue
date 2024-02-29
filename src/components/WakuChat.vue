@@ -1,141 +1,37 @@
 <script setup lang="ts">
-import { ref, inject, onMounted, watchEffect } from "vue";
-import * as protobuf from "protobufjs";
-import { LightNode, Encoder, Decoder } from "@waku/sdk";
+import { ref, onMounted, watchEffect } from "vue";
+import { Message } from "../types/ChatTypes";
+import { initialization, sendMessage, participants, room, messageList, isConnected, changeRoom } from "../components/WakuLogic"
 
-type Message = { id: string, author: string, type: string, timestamp: number, liked: boolean, data: { text?: string, emoji?: string }, room: string }
-
-const startWaku = inject("startWaku") as () => Promise<LightNode>;
-const ChatInterface = inject("chatInterface") as protobuf.Type;
-const ChatEncoder = inject("chatEncoder") as Encoder;
-const ChatDecoder = inject("chatDecoder") as Decoder;
-const id = ref<string>("");
-const status = ref<string>("Waku Connecting...");
-const isConnected = ref<boolean>(false);
-
-const typedMessage = ref<string>("");
 const isChatOpen = ref<boolean>(false);
-const newMessagesCount = ref<number>(0);
-const messageList = ref<Message[]>([])
 const messageFiltered = ref<Message[]>([]);
-const participants = ref<{ id: string, name: string }[]>([])
-const myName = ref<string>('Me')
-const room = ref<string>('All')
 
-// Create the callback function
-const messageCallback = (wakuMessage: any) => {
-  // Check if there is a payload on the message
-  if (!wakuMessage.payload) return;
-  // Render the messageObj as desired in your application
-  const messageObj: any = ChatInterface.decode(wakuMessage.payload);
-  messageList.value = [...messageList.value, {
-    id: messageObj.id,
-    author: messageObj.sender,
-    type: messageObj.type,
-    liked: false,
-    room: messageObj.room,
-    data: { text: messageObj.message },
-    timestamp: messageObj.timestamp
-  }]
+onMounted(initialization);
 
-  for (let i = 0; i < participants.value.length; i++) {
-    if (participants.value[i].id === messageObj.sender.id) {
-      participants.value[i] = messageObj.sender;
-      return;
-    }
-  }
-  participants.value = [...participants.value, messageObj.sender]
-};
-
-let sendMessageToServer = async (msg: Message) => { console.log(msg) };
-
-onMounted(async () => {
-  const n = await startWaku();
-  id.value = n.libp2p.peerId.toString();
-  participants.value = [{ id: id.value, name: myName.value }]
-  status.value = "Waku connected.";
-
-  // Create a Filter subscription
-  // const subscription = await node.value.filter.createSubscription();
-  // Subscribe to content topics and process new messages
-  await n.filter.subscribe([ChatDecoder], messageCallback);
-  isConnected.value = true;
-  sendMessageToServer = async (msg: Message) => {
-    if (!isConnected) return;
-
-    // Create a new message object
-    const protoMessage = ChatInterface.create({
-      timestamp: msg.timestamp,
-      author: msg.author,
-      message: typedMessage.value,
-      liked: msg.liked,
-      room: msg.room,
-      id: msg.id
-    });
-    // Serialise the message using Protobuf
-    const serialisedMessage = ChatInterface.encode(protoMessage).finish();
-
-    // Send the message using Light Push
-    await n.lightPush.send(ChatEncoder, {
-      payload: serialisedMessage,
-    });
-    typedMessage.value = "";
-  };
-});
-
-const sendMessage = (msg: Message) => {
-  msg.author = id.value
-  msg.room = room.value
-  msg.liked = false
-  msg.timestamp = Date.now()
-  msg.id = msg.author + msg.timestamp
-
-  let messageData = ''
-  if (msg.data.text && msg.data.text.length > 0) {
-    messageData = msg.data.text
-  } else if (msg.data.emoji && msg.data.emoji.length > 0) {
-    messageData = msg.data.emoji
-  }
-
-  setTimeout(async () => {
-    newMessagesCount.value = isChatOpen ? newMessagesCount.value : newMessagesCount.value + 1
-    typedMessage.value = messageData
-    await sendMessageToServer(msg)
-    onMessageWasSent(msg)
-  }, 0);
-}
-
-const onMessageWasSent = (message: Message) => {
-  // called when the user sends a message
-  messageList.value = [...messageList.value, message]
-}
 const openChat = () => {
   // called when the user clicks on the fab button to open the chat
   if (!isConnected) return
   isChatOpen.value = true
-  newMessagesCount.value = 0
 }
 
 const closeChat = () => {
   isChatOpen.value = false
 }
 
-const like = (id: string) => {
-  const m = messageList.value.findIndex((m) => m.id === id)
-  var msg = messageList.value[m]
+const like = (msgId: string) => {
+  const msgList = [...messageList.value]
+  const m = msgList.findIndex((m) => m.id === msgId)
+  var msg = msgList[m]
   msg.liked = !msg.liked
-  messageList.value[m] = msg
+  msgList[m] = msg
+  messageList.value = (msgList)
 }
 
-const changeRoom = (newRoom: string, e: MouseEvent) => {
-  e.stopPropagation();
-  room.value = newRoom + ' ' + id
-}
-
-const getUserName = (id: string) => {
+const getUserName = (userId: string) => {
+  console.log(userId)
   let name = 'All'
   participants.value.forEach(participant => {
-    if (participant.id === id)
+    if (participant.id === userId)
       name = participant.name
   });
   return name
@@ -151,18 +47,19 @@ watchEffect(() => {
 
 <template>
   <div v-if="isConnected">
+    {{ participants }}
     <BeautifulChat title="Doiim Chat" :participants="participants" :isOpen="isChatOpen" :close="closeChat"
       :open="openChat" :onMessageWasSent="sendMessage" :messageList="messageFiltered" :showEmoji="true" :showFile="false"
       :showEdition="true" :showDeletion="true" :deletionConfirmation="true" :showLauncher="true" :showCloseButton="true"
       :disableUserListToggle="false">
       <template v-slot:header>
-        {{ getUserName(room.split(' ')[0]) + ' room' }}
+        {{ getUserName(room) + ' room' }}
         <button @click="changeRoom('All', $event)">
           back to all
         </button>
       </template>
       <template v-slot:user-avatar="{ user }">
-        <button v-if="user && user.name" @click="changeRoom(user.id, $event)">
+        <button v-if="user" @click="changeRoom(user.id, $event)">
           {{ user.name }}
         </button>
         <div>
