@@ -13,8 +13,7 @@
     "@libp2p/interfaces": "^3.3.2",
     "@waku/sdk": "^0.0.22",
     "protobufjs": "^7.2.6",
-    "vue": "^3.4.15",
-    "vue3-beautiful-chat": "^3.3.1"
+    "vue": "^3.4.15"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

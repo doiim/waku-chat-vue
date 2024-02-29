@@ -84,13 +84,17 @@ export const initialization = (async () => {
     };
 });
 
-export const sendMessage = (msg: Message) => {
-    msg.author = myInfo.value
-    msg.room = room.value
-    msg.liked = false
-    msg.timestamp = Date.now()
-    msg.id = msg.author.id + msg.timestamp
-
+export const sendMessage = (msgData: { text?: string, emoji?: string }, msgType: string) => {
+    const timestamp = Date.now()
+    const msg: Message = {
+        author: myInfo.value,
+        room: room.value,
+        liked: false,
+        type: msgType,
+        data: msgData,
+        timestamp: timestamp,
+        id: myInfo.value.id + timestamp,
+    }
     setTimeout(async () => {
         await sendMessageToServer(msg)
         onMessageWasSent(msg)
