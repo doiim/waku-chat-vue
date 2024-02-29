@@ -10,7 +10,6 @@ const messageInput = ref<string>('');
 onMounted(initialization);
 
 const openChat = () => {
-  // called when the user clicks on the fab button to open the chat
   if (!isConnected) return
   isChatOpen.value = true
 }
@@ -18,15 +17,6 @@ const openChat = () => {
 const closeChat = () => {
   isChatOpen.value = false
 }
-
-// const like = (msgId: string) => {
-//   const msgList = [...messageList.value]
-//   const m = msgList.findIndex((m) => m.id === msgId)
-//   var msg = msgList[m]
-//   msg.liked = !msg.liked
-//   msgList[m] = msg
-//   messageList.value = (msgList)
-// }
 
 const handleSendMessage = () => {
   sendMessage({ text: messageInput.value }, 'text')
@@ -41,11 +31,24 @@ const getUserName = (userId: string) => {
   });
   return name
 }
+const messageContainerRef = ref<HTMLElement | null>(null);
+const scrollToBottom = () => {
+  // Verifica se a referência ao contêiner de mensagens existe
+  if (messageContainerRef.value) {
+    const container = messageContainerRef.value
+    // Define o scrollTop para a altura total do contêiner
+    setTimeout(() => {
+      container.scrollTop = container.scrollHeight;
+    }, 100);
+  }
+};
 
 watchEffect(() => {
   messageFiltered.value = messageList.value.filter(message => {
     return message.room === room.value;
   })
+  if (messageFiltered.value.length > 0)
+    scrollToBottom();
 });
 
 </script>
@@ -56,20 +59,20 @@ watchEffect(() => {
       <div class="chat-header">
         <div class="title">{{ getUserName(room.split(' ')[0]) + ' room' }}</div>
         <button @click="changeRoom('All', $event)" class="back-button">
-          back to all
+          back to everyone
         </button>
         <button @click="closeChat" class="minimize-button">-</button>
       </div>
-      <div class="chat-body">
-        <div v-for="message in messageFiltered" :key="message.id" class="message-container">
-          <div :class="{ 'own-message': message.author.id === myInfo.id }" class="message">
+      <div class="chat-body" ref="messageContainerRef">
+        <div v-for="message in messageFiltered" :key="message.id"
+          :class="{ 'own-message': message.author.id === myInfo.id }" class="message-container">
+          <div class="message">
             <div class="message-info">
               <span class="user-name">
                 <button @click="changeRoom(message.author.id, $event)" class="back-button">
                   {{ message.author.name }}
                 </button>
               </span>
-              
             </div>
             <div class="message-content">{{ message.data.text }}</div>
           </div>
@@ -129,14 +132,6 @@ watchEffect(() => {
   font-weight: bold;
 }
 
-.back-button,
-.minimize-button {
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-}
-
 .chat-body {
   flex: 1;
   overflow-y: auto;
@@ -170,27 +165,44 @@ watchEffect(() => {
   border-radius: 4px;
 }
 
-.send-button,
-.emoji-button {
-  background-color: #3498db;
-  color: #fff;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
+.open-button,
+.spinner {
+  position: fixed;
+  right: 25px;
+  bottom: 25px;
 }
 
-.open-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #3498db;
+.open-button,
+.spinner,
+.minimize-button,
+.send-button {
+  width: 60px;
+  height: 60px;
+  background-color: black;
   color: #fff;
-  border: none;
-  padding: 10px;
-  border-radius: 4px;
+  border-radius: 50%;
+  box-shadow: none;
+  transition: box-shadow .2s ease-in-out;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
+.minimize-button {
+  width: 30px;
+  height: 30px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
 
 .message-container {
   display: flex;
@@ -199,7 +211,12 @@ watchEffect(() => {
   margin-bottom: 10px;
 }
 
+.message-container div {
+  align-self: end;
+}
+
 .message {
+  min-width: 100px;
   max-width: 70%;
   padding: 10px;
   border-radius: 8px;
@@ -207,8 +224,11 @@ watchEffect(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.own-message {
-  justify-content: flex-start;
+.own-message div {
+  align-self: start;
+}
+
+.own-message .message {
   background-color: #3498db;
   color: #fff;
 }
