@@ -4,7 +4,7 @@ import WakuChat from "./components/WakuChat.vue";
 
 <template>
   <div id="app">
-    <WakuChat />
+    <WakuChat :availableRooms="['General', 'Support', 'Off Topic']" :allowPrivateChat="true"/>
   </div>
 </template>
 

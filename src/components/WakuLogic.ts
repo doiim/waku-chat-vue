@@ -16,7 +16,7 @@ const status = ref<string>("Waku Connecting...");
 export const isConnected = ref<boolean>(false);
 export const messageList = ref<Message[]>([])
 export const participants = ref<Participant[]>([])
-export const room = ref<string>('All')
+export const room = ref<string>('')
 export const myInfo = ref<Participant>({ id: "", name: "Me" });
 
 // Create the callback function

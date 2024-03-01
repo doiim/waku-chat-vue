@@ -6,20 +6,32 @@ import { initialization, sendMessage, participants, room, messageList, isConnect
 const isChatOpen = ref<boolean>(false);
 const messageFiltered = ref<Message[]>([]);
 const messageInput = ref<string>('');
-const availableRooms = ref<string[]>(['All']);
-const newRoomName = ref<string>('');
+const props = defineProps(['availableRooms','allowPrivateChat']);
 
-onMounted(initialization);
+onMounted(() => {
+  room.value = props.availableRooms[0]
+  initialization()
+});
 
-const createRoom = () => {
-  if (newRoomName.value.trim() !== '') {
-    availableRooms.value.push(newRoomName.value.trim());
-    changeRoomDropdown(newRoomName.value.trim());
-    newRoomName.value = '';
-  }
+const editMode = ref(false);
+const editedUserName = ref(myInfo.value.name);
+
+const enterEditMode = () => {
+  editMode.value = true;
 };
+
+const exitEditMode = () => {
+  editMode.value = false;
+};
+
+const saveEditedUserName = () => {
+  // You can add additional validation if needed
+  myInfo.value.name = editedUserName.value;
+  exitEditMode();
+};
+
 const getRoomName = (room: string) => {
-  let name = 'All';
+  let name = props.availableRooms[0];
   participants.value.forEach(participant => {
     name = room.replace(new RegExp(participant.id, 'g'), participant.name);
   });
@@ -70,21 +82,29 @@ watchEffect(() => {
   <div v-if="isConnected">
     <div v-if="isChatOpen" class="chat-container" :class="{ 'open': isChatOpen }">
       <div class="chat-header">
-        <div class="title">{{ getRoomName(room) + ' room' }}</div>
-        <div class="room-dropdown">
-          <button class="dropdown-button">Change Room</button>
-          <div class="dropdown-content">
-            <div class="create-room">
-              <input v-model="newRoomName" @keypress.enter="createRoom" placeholder="Create a new room..." />
-            </div>
-            <div v-for="availableRoom in availableRooms" :key="availableRoom">
-              <button @click="changeRoomDropdown(availableRoom)">
-                {{ availableRoom }}
-              </button>
+        <div class="user-section">
+          <div class="user-profile">
+            <span class="user-name" v-if="!editMode" @click="enterEditMode">{{ myInfo.name }}</span>
+            <input v-model="editedUserName" v-if="editMode" @blur="exitEditMode" @keypress.enter="saveEditedUserName"
+              class="edit-user-input" />
+          </div>
+          <button @click="closeChat" class="minimize-button">-</button>
+        </div>
+        <div class="room-section">
+          <div class="room-info">
+            <span class="room-name">{{ getRoomName(room) + ' room' }}</span>
+          </div>
+          <div class="room-dropdown">
+            <button class="dropdown-button">Change Room</button>
+            <div class="dropdown-content">
+              <div v-for="availableRoom in props.availableRooms" :key="availableRoom">
+                <button @click="changeRoomDropdown(availableRoom)">
+                  {{ availableRoom }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-        <button @click="closeChat" class="minimize-button">-</button>
       </div>
       <div class="chat-body" ref="messageContainerRef">
         <div v-for="message in messageFiltered" :key="message.id"
@@ -92,9 +112,12 @@ watchEffect(() => {
           <div class="message">
             <div class="message-info">
               <span class="user-name">
-                <button @click="privateRoom(message.author.id)" class="back-button">
+                <button v-if="props.allowPrivateChat" @click="privateRoom(message.author.id)" class="user-name-baloon-btn">
                   {{ message.author.name }}
                 </button>
+                <span v-else class="user-name-baloon">
+                  {{ message.author.name }}
+                </span>
               </span>
             </div>
             <div class="message-content">{{ message.data.text }}</div>
@@ -123,18 +146,6 @@ watchEffect(() => {
 </template>
 
 <style scoped>
-
-.create-room {
-  margin: 8px 0; /* Adiciona margem acima e abaixo do botão "Create Room" */
-}
-
-.create-room input {
-  padding: 12px 16px;
-  border: none;
-  border-radius: 16px;
-  margin-bottom: 8px; /* Adiciona espaçamento abaixo do input */
-}
-
 .room-dropdown {
   position: relative;
   display: inline-block;
@@ -144,15 +155,21 @@ watchEffect(() => {
   display: none;
   right: 0;
   position: absolute;
-  background-color: rgba(31, 41, 55, 1); /* Cor de fundo do dropdown */
-  min-width: 100%; /* Ocupa 100% da largura do dropdown */
+  background-color: rgba(29, 78, 216, 1);
+  /* Cor de fundo do dropdown */
+  min-width: 100%;
+  /* Ocupa 100% da largura do dropdown */
   box-shadow: 0px 8px 16px 0px rgba(31, 41, 55, 0.1);
   z-index: 1;
-  max-width: 256px; 
+  max-width: 256px;
   overflow: hidden;
-  text-overflow: ellipsis; /* Adiciona reticências (...) quando o texto ultrapassa o tamanho */
-  white-space: nowrap; /* Impede a quebra de linha */
-  border-radius: 16px; /* Borda arredondada */
+  text-overflow: ellipsis;
+  /* Adiciona reticências (...) quando o texto ultrapassa o tamanho */
+  white-space: nowrap;
+  /* Impede a quebra de linha */
+  border-radius: 16px;
+  border: 2px solid rgba(229, 231, 235, 1);
+  /* Borda arredondada */
 }
 
 .dropdown-content button {
@@ -161,8 +178,10 @@ watchEffect(() => {
   text-decoration: none;
   display: block;
   cursor: pointer;
-  width: 100%; /* Ocupa 100% da largura do botão */
-  text-align: left; /* Alinha o texto à esquerda */
+  width: 100%;
+  /* Ocupa 100% da largura do botão */
+  text-align: left;
+  /* Alinha o texto à esquerda */
   border: none;
   background: none;
   transition: background-color 0.3s ease-in-out;
@@ -170,7 +189,8 @@ watchEffect(() => {
 }
 
 .dropdown-content button:hover {
-  background-color: rgba(229, 231, 235, 1); /* Cor de destaque ao passar o mouse */
+  background-color: rgba(31, 41, 55, 0.9);
+  /* Cor de destaque ao passar o mouse */
 }
 
 .room-dropdown:hover .dropdown-content {
@@ -192,7 +212,7 @@ watchEffect(() => {
   bottom: 16px;
   right: 16px;
   background-color: rgba(255, 255, 255, 1);
-  border: 1px solid rgba(229, 231, 235, 1);
+  border: 2px solid rgba(29, 78, 216, 1);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -210,16 +230,70 @@ watchEffect(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top-left-radius: 16px; /* Adiciona bordas arredondadas ao canto superior esquerdo */
-  border-top-right-radius: 16px; /* Adiciona bordas arredondadas ao canto superior direito */
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  flex-direction: column;
 }
 
-.title {
-  font-size: 16px;
+.user-section {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.room-section {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border: 2px solid white;
+  padding: 0px 8px;
+  width: 100%;
+  margin-right: 8px;
+  background-color: rgba(29, 78, 216, 0.1);
+  /* Add background color to highlight the section */
+  border-radius: 16px;
+  /* Add border-radius for rounded corners */
+}
+
+.user-profile:hover {
+  background-color: rgba(29, 78, 216, 0.8);
+  /* Add hover effect to make it interactive */
+}
+
+.user-name {
   font-weight: bold;
-  overflow: hidden;
-  text-overflow: ellipsis; /* Adiciona reticências (...) quando o texto ultrapassa o tamanho */
-  white-space: nowrap; /* Impede a quebra de linha */
+  width: 100%;
+  margin-left: 4px;
+  text-align: start;
+  /* Add cursor pointer to indicate it's clickable */
+}
+
+.edit-user-input {
+  font-size: 14px;
+  border: 1px solid rgba(29, 78, 216, 0.5);
+  /* Add border to the input for visibility */
+  border-radius: 16px;
+  /* Add border-radius for rounded corners */
+  margin: 4px 0px;
+  height: 38px;
+  width: 100%;
+}
+
+.room-info {
+  margin-right: 10px;
+  /* Adjust the spacing between user info and room info */
+}
+
+.room-name {
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .chat-body {
@@ -249,11 +323,13 @@ watchEffect(() => {
 
 .message-input {
   flex: 1;
-  height: 32px; /* Aumenta o preenchimento para destacar mais as cores */
+  height: 32px;
+  /* Aumenta o preenchimento para destacar mais as cores */
   padding: 16px;
   margin-right: 8px;
-  border: 1px solid rgba(229, 231, 235, 1);
-  border-radius: 25px; /* Adiciona bordas arredondadas */
+  border: 2px solid rgba(29, 78, 216, 1);
+  border-radius: 16px;
+  /* Adiciona bordas arredondadas */
 }
 
 .open-button,
@@ -262,9 +338,10 @@ watchEffect(() => {
 .send-button {
   width: 64px;
   height: 64px;
-  background-color: rgba(31, 41, 55, 1);
+  background-color: rgba(29, 78, 216, 1);
   color: rgba(255, 255, 255, 1);
   border-radius: 50%;
+  border: 2px solid rgba(229, 231, 235, 1);
   box-shadow: none;
   transition: box-shadow .2s ease-in-out;
   cursor: pointer;
@@ -278,7 +355,14 @@ watchEffect(() => {
   height: 32px;
 }
 
-.back-button {
+.user-name-baloon {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 1);
+  font-weight: bold;
+}
+
+.user-name-baloon-btn {
   background: none;
   border: none;
   color: rgba(255, 255, 255, 1);
@@ -302,9 +386,9 @@ watchEffect(() => {
   min-width: 96px;
   max-width: 67%;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 16px;
   background-color: rgba(229, 231, 235, 1);
-  box-shadow: 0 2px 4px rgba(31, 41, 55, 0.1);
+  box-shadow: 0 2px 4px rgba(29, 78, 216, 0.1);
 }
 
 .own-message div {
@@ -316,11 +400,6 @@ watchEffect(() => {
   color: rgba(255, 255, 255, 1);
 }
 
-.user-name {
-  font-weight: bold;
-  margin-right: 5px;
-}
-
 .timestamp {
   font-size: 12px;
   color: rgba(136, 153, 166, 1);
@@ -330,10 +409,11 @@ watchEffect(() => {
   word-wrap: break-word;
 }
 
-.open-button, .spinner {
+.open-button,
+.spinner {
   width: 64px;
   height: 64px;
-  background-color: rgba(31, 41, 55, 1);
+  background-color: rgba(29, 78, 216, 1);
   position: fixed;
   right: 32px;
   bottom: 32px;
