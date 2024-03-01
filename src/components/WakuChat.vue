@@ -6,7 +6,7 @@ import { initialization, sendMessage, participants, room, messageList, isConnect
 const isChatOpen = ref<boolean>(false);
 const messageFiltered = ref<Message[]>([]);
 const messageInput = ref<string>('');
-const props = defineProps(['availableRooms','allowPrivateChat']);
+const props = defineProps(['availableRooms', 'allowPrivateChat']);
 
 onMounted(() => {
   room.value = props.availableRooms[0]
@@ -112,7 +112,8 @@ watchEffect(() => {
           <div class="message">
             <div class="message-info">
               <span class="user-name">
-                <button v-if="props.allowPrivateChat" @click="privateRoom(message.author.id)" class="user-name-baloon-btn">
+                <button v-if="props.allowPrivateChat" @click="privateRoom(message.author.id)"
+                  class="user-name-baloon-btn">
                   {{ message.author.name }}
                 </button>
                 <span v-else class="user-name-baloon">
@@ -256,14 +257,16 @@ watchEffect(() => {
   padding: 0px 8px;
   width: 100%;
   margin-right: 8px;
-  background-color: rgba(29, 78, 216, 0.1);
+  cursor: pointer;
+  background-color: rgba(29, 78, 216, 0.8);
+  transition: background-color 0.3s ease-in-out;
   /* Add background color to highlight the section */
   border-radius: 16px;
   /* Add border-radius for rounded corners */
 }
 
 .user-profile:hover {
-  background-color: rgba(29, 78, 216, 0.8);
+  background-color: rgba(31, 41, 55, 0.9);
   /* Add hover effect to make it interactive */
 }
 
@@ -342,12 +345,29 @@ watchEffect(() => {
   color: rgba(255, 255, 255, 1);
   border-radius: 50%;
   border: 2px solid rgba(229, 231, 235, 1);
-  box-shadow: none;
-  transition: box-shadow .2s ease-in-out;
-  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.open-button,
+.minimize-button,
+.send-button {
+  cursor: pointer;
+}
+
+.open-button:hover,
+.minimize-button:hover,
+.send-button:hover {
+  background-color: rgba(31, 41, 55, 0.9);
+}
+
+.open-button,
+.spinner {
+  position: fixed;
+  right: 34px;
+  bottom: 36px;
 }
 
 .minimize-button {
@@ -407,23 +427,6 @@ watchEffect(() => {
 
 .message-content {
   word-wrap: break-word;
-}
-
-.open-button,
-.spinner {
-  width: 64px;
-  height: 64px;
-  background-color: rgba(29, 78, 216, 1);
-  position: fixed;
-  right: 32px;
-  bottom: 32px;
-  border-radius: 50%;
-  box-shadow: none;
-  transition: box-shadow .2s ease-in-out;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .spinner div {
