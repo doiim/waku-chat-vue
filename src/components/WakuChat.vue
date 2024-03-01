@@ -83,9 +83,9 @@ watchEffect(() => {
     <div v-if="isChatOpen" class="chat-container" :class="{ 'open': isChatOpen }">
       <div class="chat-header">
         <div class="user-section">
-          <div class="user-profile">
-            <span class="user-name" v-if="!editMode" @click="enterEditMode">{{ myInfo.name }}</span>
-            <input v-model="editedUserName" v-if="editMode" @blur="exitEditMode" @keypress.enter="saveEditedUserName"
+          <div class="user-profile" @click="enterEditMode">
+            <span class="user-name" v-if="!editMode">{{ myInfo.name }}</span>
+            <input v-model="editedUserName" v-else @blur="exitEditMode" @keypress.enter="saveEditedUserName"
               class="edit-user-input" />
           </div>
           <button @click="closeChat" class="minimize-button">-</button>
@@ -295,6 +295,7 @@ watchEffect(() => {
   flex: 1;
   overflow-y: auto;
   padding: 10px;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .like-button {
@@ -313,9 +314,11 @@ watchEffect(() => {
   display: flex;
   align-items: center;
   padding: 16px;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .message-input {
+  font-size: 18px;
   flex: 1;
   height: 32px;
   /* Aumenta o preenchimento para destacar mais as cores */
