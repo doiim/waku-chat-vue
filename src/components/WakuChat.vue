@@ -125,9 +125,9 @@ watchEffect(() => {
           </div>
           <div class="timestamp">
             <button @click="message.liked = !message.liked" class="like-button">👍</button>
-            <span v-if="!message.liked">like</span>
             <span v-if="message.liked">liked</span>
-            <span>{{ ((new
+            <span v-else>like</span>
+            <span>{{ ' - ' + ((new
               Date(message.timestamp)).toLocaleTimeString()) }}
             </span>
           </div>
@@ -270,14 +270,6 @@ watchEffect(() => {
   /* Add hover effect to make it interactive */
 }
 
-.user-name {
-  font-weight: bold;
-  width: 100%;
-  margin-left: 4px;
-  text-align: start;
-  /* Add cursor pointer to indicate it's clickable */
-}
-
 .edit-user-input {
   font-size: 14px;
   border: 1px solid rgba(29, 78, 216, 0.5);
@@ -310,7 +302,6 @@ watchEffect(() => {
   border: none;
   cursor: pointer;
   font-size: 14px;
-  margin-left: 5px;
 }
 
 .message-info {
@@ -375,11 +366,16 @@ watchEffect(() => {
   height: 32px;
 }
 
-.user-name-baloon {
-  background: none;
-  border: none;
+.own-message .user-name-baloon {
   color: rgba(255, 255, 255, 1);
+}
+
+.user-name-baloon {
   font-weight: bold;
+  width: 100%;
+  margin-left: 4px;
+  text-align: start;
+  color: rgba(29, 78, 216, 1);
 }
 
 .user-name-baloon-btn {
@@ -407,7 +403,8 @@ watchEffect(() => {
   max-width: 67%;
   padding: 10px;
   border-radius: 16px;
-  background-color: rgba(229, 231, 235, 1);
+  background-color: rgba(136, 153, 166, 0.3);
+  color: rgba(29, 78, 216, 1);
   box-shadow: 0 2px 4px rgba(29, 78, 216, 0.1);
 }
 
