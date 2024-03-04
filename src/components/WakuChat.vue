@@ -6,7 +6,18 @@ import { initialization, sendMessage, participants, room, messageList, isConnect
 const isChatOpen = ref<boolean>(false);
 const messageFiltered = ref<Message[]>([]);
 const messageInput = ref<string>('');
-const props = defineProps(['availableRooms', 'allowPrivateChat']);
+const computedCss = ref<any>({
+  primaryColor: 'rgba(29, 78, 216, 1)',
+  primaryColorHover: 'rgba(29, 78, 180, 1)',
+  secondaryColor: 'rgba(229, 231, 235, 1)',
+  secondaryColorHover: 'rgba(229, 231, 235, 0.7)',
+  backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  myMessageColor: 'rgba(29, 78, 216, 1)',
+  myMessageTextColor: 'rgba(255, 255, 255, 1)',
+  otherMessageColor: 'rgba(136, 153, 166, 0.3)',
+  otherMessageTextColor: 'rgba(29, 78, 216, 1)',
+});
+const props = defineProps(['availableRooms', 'allowPrivateChat', 'cssConfig']);
 
 onMounted(() => {
   room.value = props.availableRooms[0]
@@ -76,6 +87,30 @@ watchEffect(() => {
     scrollToBottom();
 });
 
+watchEffect(() => {
+  if (!props.cssConfig) return
+  if (props.cssConfig.primaryColor)
+    computedCss.value.primaryColor = props.cssConfig.primaryColor
+  if (props.cssConfig.primaryColorHover)
+    computedCss.value.primaryColorHover = props.cssConfig.primaryColorHover
+  if (props.cssConfig.secondaryColor)
+    computedCss.value.secondaryColor = props.cssConfig.secondaryColor
+  if (props.cssConfig.secondaryColorHover)
+    computedCss.value.secondaryColorHover = props.cssConfig.secondaryColorHover
+  if (props.cssConfig.backgroundColor)
+    computedCss.value.backgroundColor = props.cssConfig.backgroundColor
+
+  if (props.cssConfig.otherMessageColor)
+    computedCss.value.otherMessageColor = props.cssConfig.otherMessageColor
+  if (props.cssConfig.otherMessageTextColor)
+    computedCss.value.otherMessageTextColor = props.cssConfig.otherMessageTextColor
+  if (props.cssConfig.myMessageColor)
+    computedCss.value.myMessageColor = props.cssConfig.myMessageColor
+  if (props.cssConfig.myMessageTextColor)
+    computedCss.value.myMessageTextColor = props.cssConfig.myMessageTextColor
+
+})
+
 </script>
 
 <template>
@@ -124,11 +159,11 @@ watchEffect(() => {
             <div class="message-content">{{ message.data.text }}</div>
           </div>
           <div class="timestamp">
-            <button @click="message.liked = !message.liked" class="like-button">👍</button>
+            <!-- <button @click="message.liked = !message.liked" class="like-button">👍</button>
             <span v-if="message.liked">liked</span>
-            <span v-else>like</span>
-            <span>{{ ' - ' + ((new
-              Date(message.timestamp)).toLocaleTimeString()) }}
+            <span v-else>like</span> -->
+            <span>{{ ((new
+    Date(message.timestamp)).toLocaleTimeString()) }}
             </span>
           </div>
         </div>
@@ -156,25 +191,19 @@ watchEffect(() => {
   display: none;
   right: 0;
   position: absolute;
-  background-color: rgba(29, 78, 216, 1);
-  /* Cor de fundo do dropdown */
+  background-color: v-bind('computedCss.primaryColor');
   min-width: 100%;
-  /* Ocupa 100% da largura do dropdown */
-  box-shadow: 0px 8px 16px 0px rgba(31, 41, 55, 0.1);
   z-index: 1;
   max-width: 256px;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* Adiciona reticências (...) quando o texto ultrapassa o tamanho */
   white-space: nowrap;
-  /* Impede a quebra de linha */
   border-radius: 16px;
-  border: 2px solid rgba(229, 231, 235, 1);
-  /* Borda arredondada */
+  border: 2px solid v-bind('computedCss.secondaryColor');
 }
 
 .dropdown-content button {
-  color: rgba(255, 255, 255, 1);
+  color: v-bind('computedCss.secondaryColor');
   padding: 12px 16px;
   text-decoration: none;
   display: block;
@@ -190,7 +219,7 @@ watchEffect(() => {
 }
 
 .dropdown-content button:hover {
-  background-color: rgba(31, 41, 55, 0.9);
+  background-color: v-bind('computedCss.primaryColorHover');
   /* Cor de destaque ao passar o mouse */
 }
 
@@ -203,7 +232,7 @@ watchEffect(() => {
   border: none;
   cursor: pointer;
   font-size: 16px;
-  color: rgba(255, 255, 255, 1);
+  color: v-bind('computedCss.secondaryColor');
 }
 
 .chat-container {
@@ -212,8 +241,8 @@ watchEffect(() => {
   position: fixed;
   bottom: 16px;
   right: 16px;
-  background-color: rgba(255, 255, 255, 1);
-  border: 2px solid rgba(29, 78, 216, 1);
+  background-color: v-bind('computedCss.secondaryColor');
+  border: 2px solid v-bind('computedCss.primaryColor');
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -225,8 +254,8 @@ watchEffect(() => {
 }
 
 .chat-header {
-  background-color: rgba(29, 78, 216, 1);
-  color: rgba(255, 255, 255, 1);
+  background-color: v-bind('computedCss.primaryColor');
+  color: v-bind('computedCss.secondaryColor');
   padding: 10px;
   display: flex;
   justify-content: space-between;
@@ -253,12 +282,12 @@ watchEffect(() => {
   display: flex;
   align-items: center;
   height: 48px;
-  border: 2px solid white;
+  border: 2px solid v-bind('computedCss.secondaryColor');
   padding: 0px 8px;
   width: 100%;
   margin-right: 8px;
   cursor: pointer;
-  background-color: rgba(29, 78, 216, 0.8);
+  background-color: v-bind('computedCss.primaryColor');
   transition: background-color 0.3s ease-in-out;
   /* Add background color to highlight the section */
   border-radius: 16px;
@@ -266,13 +295,13 @@ watchEffect(() => {
 }
 
 .user-profile:hover {
-  background-color: rgba(31, 41, 55, 0.9);
+  background-color: v-bind('computedCss.primaryColorHover');
   /* Add hover effect to make it interactive */
 }
 
 .edit-user-input {
   font-size: 14px;
-  border: 1px solid rgba(29, 78, 216, 0.5);
+  border: 1px solid v-bind('computedCss.primaryColor');
   /* Add border to the input for visibility */
   border-radius: 16px;
   /* Add border-radius for rounded corners */
@@ -295,7 +324,7 @@ watchEffect(() => {
   flex: 1;
   overflow-y: auto;
   padding: 10px;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: v-bind('computedCss.backgroundColor');
 }
 
 .like-button {
@@ -314,7 +343,7 @@ watchEffect(() => {
   display: flex;
   align-items: center;
   padding: 16px;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: v-bind('computedCss.backgroundColor');
 }
 
 .message-input {
@@ -324,7 +353,9 @@ watchEffect(() => {
   /* Aumenta o preenchimento para destacar mais as cores */
   padding: 16px;
   margin-right: 8px;
-  border: 2px solid rgba(29, 78, 216, 1);
+  border: 2px solid v-bind('computedCss.primaryColor');
+  color: v-bind('computedCss.primaryColor');
+  background-color: v-bind('computedCss.backgroundColor');
   border-radius: 16px;
   /* Adiciona bordas arredondadas */
 }
@@ -335,10 +366,10 @@ watchEffect(() => {
 .send-button {
   width: 64px;
   height: 64px;
-  background-color: rgba(29, 78, 216, 1);
-  color: rgba(255, 255, 255, 1);
+  background-color: v-bind('computedCss.primaryColor');
+  color: v-bind('computedCss.secondaryColor');
   border-radius: 50%;
-  border: 2px solid rgba(229, 231, 235, 1);
+  border: 2px solid v-bind('computedCss.secondaryColor');
   transition: background-color 0.3s ease-in-out;
   display: flex;
   justify-content: center;
@@ -354,7 +385,7 @@ watchEffect(() => {
 .open-button:hover,
 .minimize-button:hover,
 .send-button:hover {
-  background-color: rgba(31, 41, 55, 0.9);
+  background-color: v-bind('computedCss.primaryColorHover');
 }
 
 .open-button,
@@ -370,7 +401,7 @@ watchEffect(() => {
 }
 
 .own-message .user-name-baloon {
-  color: rgba(255, 255, 255, 1);
+  color: v-bind('computedCss.myMessageTextColor');
 }
 
 .user-name-baloon {
@@ -378,13 +409,13 @@ watchEffect(() => {
   width: 100%;
   margin-left: 4px;
   text-align: start;
-  color: rgba(29, 78, 216, 1);
+  color: v-bind('computedCss.primaryColor');
 }
 
 .user-name-baloon-btn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 1);
+  color: v-bind('computedCss.secondaryColor');
   cursor: pointer;
   font-weight: bold;
   text-decoration: underline;
@@ -406,9 +437,8 @@ watchEffect(() => {
   max-width: 67%;
   padding: 10px;
   border-radius: 16px;
-  background-color: rgba(136, 153, 166, 0.3);
-  color: rgba(29, 78, 216, 1);
-  box-shadow: 0 2px 4px rgba(29, 78, 216, 0.1);
+  background-color: v-bind('computedCss.otherMessageColor');
+  color: v-bind('computedCss.otherMessageTextColor');
 }
 
 .own-message div {
@@ -416,13 +446,13 @@ watchEffect(() => {
 }
 
 .own-message .message {
-  background-color: rgba(29, 78, 216, 1);
-  color: rgba(255, 255, 255, 1);
+  background-color: v-bind('computedCss.myMessageColor');
+  color: v-bind('computedCss.myMessageTextColor');
 }
 
 .timestamp {
   font-size: 12px;
-  color: rgba(136, 153, 166, 1);
+  color: v-bind('computedCss.primaryColor');
 }
 
 .message-content {
@@ -432,9 +462,8 @@ watchEffect(() => {
 .spinner div {
   width: 16px;
   height: 16px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
+  border: 4px solid v-bind('computedCss.secondaryColor');
   border-radius: 50%;
-  border-top: 4px solid rgba(255, 255, 255, 1);
   animation: spin 1s linear infinite;
 }
 
