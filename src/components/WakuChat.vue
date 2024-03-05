@@ -23,8 +23,10 @@ const messageInput = ref<string>('');
 const computedCss = ref<any>({
   primaryColor: 'rgba(29, 78, 216, 1)',
   primaryColorHover: 'rgba(29, 78, 180, 1)',
+  primaryTextColor: 'rgba(255, 255, 255, 1)',
   secondaryColor: 'rgba(229, 231, 235, 1)',
   secondaryColorHover: 'rgba(229, 231, 235, 0.7)',
+  secondaryTextColor: 'rgba(0, 0, 0, 1)',
   backgroundColor: 'rgba(0, 0, 0, 0.05)',
   myMessageColor: 'rgba(29, 78, 216, 1)',
   myMessageTextColor: 'rgba(255, 255, 255, 1)',
@@ -122,10 +124,14 @@ watchEffect(() => {
     computedCss.value.primaryColor = props.cssConfig.primaryColor
   if (props.cssConfig.primaryColorHover)
     computedCss.value.primaryColorHover = props.cssConfig.primaryColorHover
+  if (props.cssConfig.primaryTextColor)
+    computedCss.value.primaryTextColor = props.cssConfig.primaryTextColor
   if (props.cssConfig.secondaryColor)
     computedCss.value.secondaryColor = props.cssConfig.secondaryColor
   if (props.cssConfig.secondaryColorHover)
     computedCss.value.secondaryColorHover = props.cssConfig.secondaryColorHover
+  if (props.cssConfig.secondaryTextColor)
+    computedCss.value.secondaryTextColor = props.cssConfig.secondaryTextColor
   if (props.cssConfig.backgroundColor)
     computedCss.value.backgroundColor = props.cssConfig.backgroundColor
 
@@ -238,7 +244,7 @@ watchEffect(() => {
 }
 
 .dropdown-content button {
-  color: v-bind('computedCss.secondaryColor');
+  color: v-bind('computedCss.primaryTextColor');
   padding: 12px 16px;
   text-decoration: none;
   display: block;
@@ -264,7 +270,7 @@ watchEffect(() => {
   border: none;
   cursor: pointer;
   font-size: 16px;
-  color: v-bind('computedCss.secondaryColor');
+  color: v-bind('computedCss.primaryTextColor');
 }
 
 .chat-container {
@@ -287,7 +293,7 @@ watchEffect(() => {
 
 .chat-header {
   background-color: v-bind('computedCss.primaryColor');
-  color: v-bind('computedCss.secondaryColor');
+  color: v-bind('computedCss.primaryTextColor');
   padding: 10px;
   display: flex;
   justify-content: space-between;
@@ -394,7 +400,7 @@ watchEffect(() => {
   width: 64px;
   height: 64px;
   background-color: v-bind('computedCss.primaryColor');
-  color: v-bind('computedCss.secondaryColor');
+  color: v-bind('computedCss.primaryTextColor');
   border-radius: 50%;
   border: 2px solid v-bind('computedCss.secondaryColor');
   transition: background-color 0.3s ease-in-out;
