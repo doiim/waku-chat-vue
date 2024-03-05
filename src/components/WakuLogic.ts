@@ -24,6 +24,8 @@ const chatState = ref<{
     room: ''
 })
 
+let sendMessageToServer = async (msg: Message) => { console.log(msg) };
+
 const myInfo = ref<Participant>({ id: "", name: "User" });
 
 export const setRoom = (_room: string) => {
@@ -58,36 +60,13 @@ export const getMyName = () => {
     return myInfo.value.name
 }
 
-export const messageCallback = (wakuMessage: any) => {
-    if (!injectWaku.ChatInterface || !wakuMessage.payload) return;
-    const messageObj: any = injectWaku.ChatInterface.decode(wakuMessage.payload);
-    const parsedMsg = JSON.parse(messageObj.message);
-
-    chatState.value.messageList = [...chatState.value.messageList, parsedMsg]
-
-    for (let i = 0; i < chatState.value.participants.length; i++) {
-        if (chatState.value.participants[i].id === parsedMsg.author.id) {
-            chatState.value.participants[i] = parsedMsg.author;
-            return;
-        }
-    }
-    chatState.value.participants = [...chatState.value.participants, parsedMsg.author]
-
-};
-
-export const changeRoom = (newRoom: string) => {
-    chatState.value.room = (newRoom)
-}
-
 export const privateRoom = (userId: string) => {
     const myId = myInfo.value.id;
     if (userId === myId)
-        chatState.value.room = userId
+        setRoom(userId)
     else
-        chatState.value.room = userId < myId ? userId + ' & ' + myId : myId + ' & ' + userId;
+        setRoom(userId < myId ? userId + ' & ' + myId : myId + ' & ' + userId);
 }
-
-export let sendMessageToServer = async (msg: Message) => { console.log(msg) };
 
 export const initialization = () => {
     injectWaku.startWaku = inject("startWaku") as () => Promise<LightNode>;
@@ -137,3 +116,20 @@ export const sendMessage = (msgData: { text?: string, emoji?: string }, msgType:
         await sendMessageToServer(msg)
     }, 0);
 }
+
+const messageCallback = (wakuMessage: any) => {
+    if (!injectWaku.ChatInterface || !wakuMessage.payload) return;
+    const messageObj: any = injectWaku.ChatInterface.decode(wakuMessage.payload);
+    const parsedMsg = JSON.parse(messageObj.message);
+
+    chatState.value.messageList = [...chatState.value.messageList, parsedMsg]
+
+    for (let i = 0; i < chatState.value.participants.length; i++) {
+        if (chatState.value.participants[i].id === parsedMsg.author.id) {
+            chatState.value.participants[i] = parsedMsg.author;
+            return;
+        }
+    }
+    chatState.value.participants = [...chatState.value.participants, parsedMsg.author]
+
+};

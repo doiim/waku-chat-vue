@@ -4,7 +4,6 @@ import { Message } from "../types/ChatTypes";
 import {
   initialization,
   sendMessage,
-  changeRoom,
   privateRoom,
   loadChat,
   setRoom,
@@ -18,8 +17,10 @@ import {
 } from "../components/WakuLogic"
 
 const isChatOpen = ref<boolean>(false);
+
 const messageFiltered = ref<Message[]>([]);
 const messageInput = ref<string>('');
+
 const computedCss = ref<any>({
   primaryColor: 'rgba(29, 78, 216, 1)',
   primaryColorHover: 'rgba(29, 78, 180, 1)',
@@ -33,6 +34,12 @@ const computedCss = ref<any>({
   otherMessageColor: 'rgba(136, 153, 166, 0.3)',
   otherMessageTextColor: 'rgba(29, 78, 216, 1)',
 });
+
+const editMode = ref(false);
+const editedUserName = ref('');
+
+const messageContainerRef = ref<HTMLElement | null>(null);
+
 const props = defineProps(['availableRooms', 'allowPrivateChat', 'cssConfig', 'changeNickMode']);
 
 onMounted(() => {
@@ -56,13 +63,9 @@ onMounted(() => {
   });
 });
 
-const editMode = ref(false);
-const editedUserName = ref('');
-
 const enterEditMode = () => {
   editMode.value = true;
 };
-
 const exitEditMode = () => {
   editMode.value = false;
 };
@@ -81,7 +84,7 @@ const getRoomName = (room: string) => {
 };
 
 const changeRoomDropdown = (selectedRoom: string) => {
-  changeRoom(selectedRoom);
+  setRoom(selectedRoom);
 };
 
 const openChat = () => {
@@ -100,7 +103,6 @@ const handleSendMessage = () => {
   messageInput.value = ''
 }
 
-const messageContainerRef = ref<HTMLElement | null>(null);
 const scrollToBottom = () => {
   if (messageContainerRef.value) {
     const container = messageContainerRef.value
@@ -197,11 +199,8 @@ watchEffect(() => {
             <div class="message-content">{{ message.data.text }}</div>
           </div>
           <div class="timestamp">
-            <!-- <button @click="message.liked = !message.liked" class="like-button">👍</button>
-            <span v-if="message.liked">liked</span>
-            <span v-else>like</span> -->
-            <span>{{ ((new
-    Date(message.timestamp)).toLocaleTimeString()) }}
+            <span>
+              {{ (new Date(message.timestamp)).toLocaleTimeString() }}
             </span>
           </div>
         </div>
@@ -226,6 +225,10 @@ watchEffect(() => {
 .room-dropdown {
   position: relative;
   display: inline-block;
+}
+
+.room-dropdown:hover .dropdown-content {
+  display: block;
 }
 
 .dropdown-content {
@@ -259,10 +262,6 @@ watchEffect(() => {
 
 .dropdown-content button:hover {
   background-color: v-bind('computedCss.primaryColorHover');
-}
-
-.room-dropdown:hover .dropdown-content {
-  display: block;
 }
 
 .dropdown-button {
@@ -330,12 +329,12 @@ watchEffect(() => {
   border-radius: 16px;
 }
 
-.non-edit {
-  cursor: default;
-}
-
 .user-profile:hover {
   background-color: v-bind('computedCss.primaryColorHover');
+}
+
+.non-edit {
+  cursor: default;
 }
 
 .edit-user-input {
@@ -361,13 +360,6 @@ watchEffect(() => {
   overflow-y: auto;
   padding: 10px;
   background-color: v-bind('computedCss.backgroundColor');
-}
-
-.like-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
 }
 
 .message-info {
@@ -428,12 +420,31 @@ watchEffect(() => {
   bottom: 36px;
 }
 
+
+.spinner div {
+  width: 16px;
+  height: 16px;
+  border: 4px solid v-bind('computedCss.secondaryColor');
+  border-top: 4px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
 .minimize-button {
   width: 32px;
   height: 32px;
 }
 
 .own-message .user-name-baloon {
+  color: v-bind('computedCss.myMessageTextColor');
+}
+
+.own-message div {
+  align-self: start;
+}
+
+.own-message .message {
+  background-color: v-bind('computedCss.myMessageColor');
   color: v-bind('computedCss.myMessageTextColor');
 }
 
@@ -474,15 +485,6 @@ watchEffect(() => {
   color: v-bind('computedCss.otherMessageTextColor');
 }
 
-.own-message div {
-  align-self: start;
-}
-
-.own-message .message {
-  background-color: v-bind('computedCss.myMessageColor');
-  color: v-bind('computedCss.myMessageTextColor');
-}
-
 .timestamp {
   font-size: 12px;
   color: v-bind('computedCss.primaryColor');
@@ -490,15 +492,6 @@ watchEffect(() => {
 
 .message-content {
   word-wrap: break-word;
-}
-
-.spinner div {
-  width: 16px;
-  height: 16px;
-  border: 4px solid v-bind('computedCss.secondaryColor');
-  border-top: 4px solid transparent;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
