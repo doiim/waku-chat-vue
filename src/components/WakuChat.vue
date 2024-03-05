@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted, watchEffect } from "vue";
 import { Message } from "../types/ChatTypes";
-import { initialization, sendMessage, participants, room, messageList, isConnected, changeRoom, privateRoom, myInfo } from "../components/WakuLogic"
+import {
+  initialization,
+  sendMessage,
+  participants,
+  room,
+  messageList,
+  status,
+  changeRoom,
+  privateRoom,
+  myInfo,
+  loadChat
+} from "../components/WakuLogic"
 
 const isChatOpen = ref<boolean>(false);
 const messageFiltered = ref<Message[]>([]);
@@ -36,7 +47,6 @@ const exitEditMode = () => {
 };
 
 const saveEditedUserName = () => {
-  // You can add additional validation if needed
   myInfo.value.name = editedUserName.value;
   exitEditMode();
 };
@@ -54,7 +64,9 @@ const changeRoomDropdown = (selectedRoom: string) => {
 };
 
 const openChat = () => {
-  if (!isConnected) return
+  if (status.value !== "connected") {
+    loadChat()
+  }
   isChatOpen.value = true
 }
 
@@ -69,10 +81,8 @@ const handleSendMessage = () => {
 
 const messageContainerRef = ref<HTMLElement | null>(null);
 const scrollToBottom = () => {
-  // Verifica se a referência ao contêiner de mensagens existe
   if (messageContainerRef.value) {
     const container = messageContainerRef.value
-    // Define o scrollTop para a altura total do contêiner
     setTimeout(() => {
       container.scrollTop = container.scrollHeight;
     }, 100);
@@ -114,7 +124,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div v-if="isConnected">
+  <div v-if="status === 'connected'">
     <div v-if="isChatOpen" class="chat-container" :class="{ 'open': isChatOpen }">
       <div class="chat-header">
         <div class="user-section">
@@ -176,8 +186,11 @@ watchEffect(() => {
     </div>
     <button v-else @click="openChat" class="open-button">Open Chat</button>
   </div>
-  <div v-else class="spinner">
+  <div v-else-if="status === 'connecting'" class="spinner">
     <div></div>
+  </div>
+  <div v-else>
+    <button @click="openChat" class="open-button">Load Chat</button>
   </div>
 </template>
 
@@ -209,9 +222,7 @@ watchEffect(() => {
   display: block;
   cursor: pointer;
   width: 100%;
-  /* Ocupa 100% da largura do botão */
   text-align: left;
-  /* Alinha o texto à esquerda */
   border: none;
   background: none;
   transition: background-color 0.3s ease-in-out;
@@ -220,7 +231,6 @@ watchEffect(() => {
 
 .dropdown-content button:hover {
   background-color: v-bind('computedCss.primaryColorHover');
-  /* Cor de destaque ao passar o mouse */
 }
 
 .room-dropdown:hover .dropdown-content {
@@ -289,22 +299,17 @@ watchEffect(() => {
   cursor: pointer;
   background-color: v-bind('computedCss.primaryColor');
   transition: background-color 0.3s ease-in-out;
-  /* Add background color to highlight the section */
   border-radius: 16px;
-  /* Add border-radius for rounded corners */
 }
 
 .user-profile:hover {
   background-color: v-bind('computedCss.primaryColorHover');
-  /* Add hover effect to make it interactive */
 }
 
 .edit-user-input {
   font-size: 14px;
   border: 1px solid v-bind('computedCss.primaryColor');
-  /* Add border to the input for visibility */
   border-radius: 16px;
-  /* Add border-radius for rounded corners */
   margin: 4px 0px;
   height: 38px;
   width: 100%;
@@ -312,7 +317,6 @@ watchEffect(() => {
 
 .room-info {
   margin-right: 10px;
-  /* Adjust the spacing between user info and room info */
 }
 
 .room-name {
@@ -350,14 +354,11 @@ watchEffect(() => {
   font-size: 18px;
   flex: 1;
   height: 32px;
-  /* Aumenta o preenchimento para destacar mais as cores */
   padding: 16px;
-  margin-right: 8px;
   border: 2px solid v-bind('computedCss.primaryColor');
   color: v-bind('computedCss.primaryColor');
   background-color: v-bind('computedCss.backgroundColor');
   border-radius: 16px;
-  /* Adiciona bordas arredondadas */
 }
 
 .open-button,
@@ -463,6 +464,7 @@ watchEffect(() => {
   width: 16px;
   height: 16px;
   border: 4px solid v-bind('computedCss.secondaryColor');
+  border-top: 4px solid transparent;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

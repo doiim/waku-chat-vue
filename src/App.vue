@@ -9,7 +9,7 @@ import WakuChat from "./components/WakuChat.vue";
       primaryColorHover: 'rgba(29, 78, 180, 1)',
       secondaryColor: 'rgba(229, 231, 235, 1)',
       secondaryColorHover: 'rgba(229, 231, 235, 0.7)',
-      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+      backgroundColor: 'rgba(0, 0, 0, 0.01)',
       myMessageColor: 'rgba(29, 78, 216, 1)',
       myMessageTextColor: 'rgba(255, 255, 255, 1)',
       otherMessageColor: 'rgba(136, 153, 166, 0.3)',
