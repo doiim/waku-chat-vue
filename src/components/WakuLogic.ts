@@ -12,39 +12,79 @@ type InjectWaku = {
 
 const injectWaku: InjectWaku = {}
 
-export const status = ref<string>("idle");
-export const messageList = ref<Message[]>([])
-export const participants = ref<Participant[]>([])
-export const room = ref<string>('')
-export const myInfo = ref<Participant>({ id: "", name: "User" });
+const chatState = ref<{
+    status: string,
+    messageList: Message[],
+    participants: Participant[],
+    room: string
+}>({
+    status: 'idle',
+    messageList: [],
+    participants: [],
+    room: ''
+})
+
+const myInfo = ref<Participant>({ id: "", name: "User" });
+
+export const setRoom = (_room: string) => {
+    chatState.value.room = _room
+}
+
+export const getRoom = () => {
+    return chatState.value.room
+}
+
+export const getMessageList = () => {
+    return chatState.value.messageList
+}
+
+export const getParticipants = () => {
+    return chatState.value.participants
+}
+
+export const getStatus = () => {
+    return chatState.value.status
+}
+
+export const getMyID = () => {
+    return myInfo.value.id
+}
+
+export const setMyName = (_newName: string) => {
+    myInfo.value.name = _newName
+}
+
+export const getMyName = () => {
+    return myInfo.value.name
+}
 
 export const messageCallback = (wakuMessage: any) => {
     if (!injectWaku.ChatInterface || !wakuMessage.payload) return;
     const messageObj: any = injectWaku.ChatInterface.decode(wakuMessage.payload);
     const parsedMsg = JSON.parse(messageObj.message);
 
-    messageList.value = [...messageList.value, parsedMsg]
+    chatState.value.messageList = [...chatState.value.messageList, parsedMsg]
 
-    for (let i = 0; i < participants.value.length; i++) {
-        if (participants.value[i].id === parsedMsg.author.id) {
-            participants.value[i] = parsedMsg.author;
+    for (let i = 0; i < chatState.value.participants.length; i++) {
+        if (chatState.value.participants[i].id === parsedMsg.author.id) {
+            chatState.value.participants[i] = parsedMsg.author;
             return;
         }
     }
-    participants.value = [...participants.value, parsedMsg.author]
+    chatState.value.participants = [...chatState.value.participants, parsedMsg.author]
 
 };
 
 export const changeRoom = (newRoom: string) => {
-    room.value = (newRoom)
+    chatState.value.room = (newRoom)
 }
 
 export const privateRoom = (userId: string) => {
     const myId = myInfo.value.id;
     if (userId === myId)
-        room.value = userId
+        chatState.value.room = userId
     else
-        room.value = userId < myId ? userId + ' & ' + myId : myId + ' & ' + userId;
+        chatState.value.room = userId < myId ? userId + ' & ' + myId : myId + ' & ' + userId;
 }
 
 export let sendMessageToServer = async (msg: Message) => { console.log(msg) };
@@ -57,17 +97,17 @@ export const initialization = () => {
 }
 
 export const loadChat = (async () => {
-    status.value = "connecting"
+    chatState.value.status = "connecting"
     if (!injectWaku.startWaku || !injectWaku.ChatDecoder) return
 
     const n = await injectWaku.startWaku();
     myInfo.value.id = n.libp2p.peerId.toString();
     myInfo.value.name = `User ${myInfo.value.id.substring(0, 10)}`
-    participants.value = [myInfo.value]
+    chatState.value.participants = [myInfo.value]
 
     await n.filter.subscribe([injectWaku.ChatDecoder], messageCallback);
     sendMessageToServer = async (msg: Message) => {
-        if (status.value !== "connected") return;
+        if (chatState.value.status !== "connected") return;
         if (!injectWaku.ChatInterface || !injectWaku.ChatEncoder) return
 
         const protoMessage = injectWaku.ChatInterface.create({
@@ -79,14 +119,14 @@ export const loadChat = (async () => {
             payload: serialisedMessage,
         });
     };
-    status.value = "connected";
+    chatState.value.status = "connected";
 });
 
 export const sendMessage = (msgData: { text?: string, emoji?: string }, msgType: string) => {
     const timestamp = Date.now()
     const msg: Message = {
         author: myInfo.value,
-        room: room.value,
+        room: chatState.value.room,
         liked: false,
         type: msgType,
         data: msgData,

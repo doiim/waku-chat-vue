@@ -4,7 +4,7 @@ import WakuChat from "./components/WakuChat.vue";
 
 <template>
   <div id="app">
-    <WakuChat :availableRooms="['General', 'Support', 'Off Topic']" :allowPrivateChat="false" :cssConfig="{
+    <WakuChat :availableRooms="['General', 'Support', 'Off Topic']" :changeNickMode="'message'" :allowPrivateChat="false" :cssConfig="{
       primaryColor: 'rgba(29, 78, 216, 1)',
       primaryColorHover: 'rgba(29, 78, 180, 1)',
       secondaryColor: 'rgba(229, 231, 235, 1)',
