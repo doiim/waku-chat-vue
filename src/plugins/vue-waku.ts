@@ -3,15 +3,18 @@ import {
   createLightNode,
   waitForRemotePeer,
   createDecoder,
-  createEncoder
+  createEncoder,
 } from "@waku/sdk";
 
 const plugin = {
-  install: async (app: any) => {
+  install: async (app: any, options: any) => {
 
     const startWaku = async function () {
-      // Create and start a Light Node
-      const node = await createLightNode({ defaultBootstrap: true });
+
+      // Bootstrap node using the static peers
+      const node = await createLightNode({
+        defaultBootstrap: true
+      });
       await node.start();
 
       // Wait for a successful peer connection
@@ -28,20 +31,24 @@ const plugin = {
       .add(new protobuf.Field("message", 3, "string"));
 
     app.provide('chatInterface', ChatInterface)
+    app.provide('chatOptions', options)
+  },
 
-    // Choose a content topic
-    const contentTopic = "/doiim/1/message";
-
-    // Create a message encoder and decoder
-    const encoder = createEncoder({
-      contentTopic: contentTopic, // message content topic
-      ephemeral: true, // allows messages not be stored on the network
-    });
-    const decoder = createDecoder(contentTopic);
-
-    app.provide('chatEncoder', encoder)
-    app.provide('chatDecoder', decoder)
-  }
 }
 
 export default plugin
+
+export const changeTopic = (_topic: string) => {
+  const topic = _topic.toLowerCase().replace(/\s/g, '');
+
+  // Choose a content topic
+  const contentTopic = `/doiim/1/${topic}`;
+
+  // Create a message encoder and decoder
+  const encoder = createEncoder({
+    contentTopic: contentTopic, // message content topic
+    ephemeral: true, // allows messages not be stored on the network
+  });
+  const decoder = createDecoder(contentTopic);
+  return { encoder, decoder }
+}

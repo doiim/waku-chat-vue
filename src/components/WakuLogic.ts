@@ -2,12 +2,15 @@ import { Message, Participant } from "../types/ChatTypes";
 import { ref, inject } from "vue";
 import * as protobuf from "protobufjs";
 import { LightNode, Encoder, Decoder } from "@waku/sdk";
+import { changeTopic } from "../plugins/vue-waku";
 
 type InjectWaku = {
     startWaku?: () => Promise<LightNode>,
     ChatInterface?: protobuf.Type,
     ChatEncoder?: Encoder,
-    ChatDecoder?: Decoder
+    ChatDecoder?: Decoder,
+    ChatOptions?: any,
+    lightNode?:LightNode
 }
 
 const injectWaku: InjectWaku = {}
@@ -28,7 +31,17 @@ let sendMessageToServer = async (msg: Message) => { console.log(msg) };
 
 const myInfo = ref<Participant>({ id: "", name: "User" });
 
-export const setRoom = (_room: string) => {
+export const setRoom = async (_room: string) => {
+    if (!injectWaku.lightNode) return
+
+    const { encoder, decoder } = changeTopic(_room)
+    injectWaku.ChatEncoder = encoder as Encoder;
+    injectWaku.ChatDecoder = decoder as Decoder;
+
+    chatState.value.messageList = []
+    chatState.value.participants = [myInfo.value]
+
+    await injectWaku.lightNode.filter.subscribe([injectWaku.ChatDecoder], messageCallback);
     chatState.value.room = _room
 }
 
@@ -68,24 +81,27 @@ export const privateRoom = (userId: string) => {
         setRoom(userId < myId ? userId + ' & ' + myId : myId + ' & ' + userId);
 }
 
+export const getOptions = () => {
+    return injectWaku.ChatOptions
+}
+
 export const initialization = () => {
     injectWaku.startWaku = inject("startWaku") as () => Promise<LightNode>;
     injectWaku.ChatInterface = inject("chatInterface") as protobuf.Type;
-    injectWaku.ChatEncoder = inject("chatEncoder") as Encoder;
-    injectWaku.ChatDecoder = inject("chatDecoder") as Decoder;
+    injectWaku.ChatOptions = inject("chatOptions") as any;
 }
 
 export const loadChat = (async () => {
     chatState.value.status = "connecting"
-    if (!injectWaku.startWaku || !injectWaku.ChatDecoder) return
+    if (!injectWaku.startWaku) return
 
-    const n = await injectWaku.startWaku();
-    myInfo.value.id = n.libp2p.peerId.toString();
+    injectWaku.lightNode = await injectWaku.startWaku();
+    myInfo.value.id = injectWaku.lightNode.libp2p.peerId.toString();
     myInfo.value.name = `User ${myInfo.value.id.substring(0, 10)}`
-    chatState.value.participants = [myInfo.value]
+    setRoom(getOptions().availableRooms[0])
 
-    await n.filter.subscribe([injectWaku.ChatDecoder], messageCallback);
     sendMessageToServer = async (msg: Message) => {
+        if (!injectWaku.lightNode) return
         if (chatState.value.status !== "connected") return;
         if (!injectWaku.ChatInterface || !injectWaku.ChatEncoder) return
 
@@ -94,7 +110,7 @@ export const loadChat = (async () => {
         });
         const serialisedMessage = injectWaku.ChatInterface.encode(protoMessage).finish();
 
-        await n.lightPush.send(injectWaku.ChatEncoder, {
+        await injectWaku.lightNode.lightPush.send(injectWaku.ChatEncoder, {
             payload: serialisedMessage,
         });
     };

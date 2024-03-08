@@ -4,7 +4,6 @@ import { Message } from "../types/ChatTypes";
 import {
   initialization,
   sendMessage,
-  privateRoom,
   loadChat,
   setRoom,
   getParticipants,
@@ -13,7 +12,8 @@ import {
   getRoom,
   setMyName,
   getMyName,
-  getMyID
+  getMyID,
+  getOptions,
 } from "../components/WakuLogic"
 
 const isChatOpen = ref<boolean>(false);
@@ -40,18 +40,15 @@ const editedUserName = ref('');
 
 const messageContainerRef = ref<HTMLElement | null>(null);
 
-const props = defineProps(['availableRooms', 'allowPrivateChat', 'cssConfig', 'changeNickMode']);
-
 onMounted(() => {
-  setRoom(props.availableRooms[0]);
   initialization();
-
+  
   editedUserName.value = getMyName();
 
   const handleNickNameChange = (event: Event) => {
     const newNick = (event as CustomEvent).detail;
 
-    if (props.changeNickMode === 'message' || props.changeNickMode === 'interface') {
+    if (getOptions().changeNickMode === 'message' || getOptions().changeNickMode === 'interface') {
       setMyName(newNick);
     }
   };
@@ -76,7 +73,7 @@ const saveEditedUserName = () => {
 };
 
 const getRoomName = (room: string) => {
-  let name = props.availableRooms[0];
+  let name = getOptions().availableRooms[0];
   getParticipants().forEach(participant => {
     name = room.replace(new RegExp(participant.id, 'g'), participant.name);
   });
@@ -121,7 +118,8 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  if (!props.cssConfig) return
+  const props = getOptions()
+  if (!props?.cssConfig) return
   if (props.cssConfig.primaryColor)
     computedCss.value.primaryColor = props.cssConfig.primaryColor
   if (props.cssConfig.primaryColorHover)
@@ -155,7 +153,7 @@ watchEffect(() => {
     <div v-if="isChatOpen" class="chat-container" :class="{ 'open': isChatOpen }">
       <div class="chat-header">
         <div class="user-section">
-          <div v-if="props.changeNickMode === 'interface'" class="user-profile" @click="enterEditMode">
+          <div v-if="getOptions().changeNickMode === 'interface'" class="user-profile" @click="enterEditMode">
             <span v-if="!editMode">{{ getMyName() }}</span>
             <input v-model="editedUserName" v-else @blur="exitEditMode" @keypress.enter="saveEditedUserName"
               class="edit-user-input" />
@@ -172,7 +170,7 @@ watchEffect(() => {
           <div class="room-dropdown">
             <button class="dropdown-button">Change Room</button>
             <div class="dropdown-content">
-              <div v-for="availableRoom in props.availableRooms" :key="availableRoom">
+              <div v-for="availableRoom in getOptions().availableRooms" :key="availableRoom">
                 <button @click="changeRoomDropdown(availableRoom)">
                   {{ availableRoom }}
                 </button>
@@ -187,11 +185,7 @@ watchEffect(() => {
           <div class="message">
             <div class="message-info">
               <span>
-                <button v-if="props.allowPrivateChat" @click="privateRoom(message.author.id)"
-                  class="user-name-baloon-btn">
-                  {{ message.author.name }}
-                </button>
-                <span v-else class="user-name-baloon">
+                <span class="user-name-baloon">
                   {{ message.author.name }}
                 </span>
               </span>
