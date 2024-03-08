@@ -14,6 +14,7 @@ import {
   getMyName,
   getMyID,
   getOptions,
+  onDestroyWaku
 } from "../components/WakuLogic"
 
 const isChatOpen = ref<boolean>(false);
@@ -42,7 +43,7 @@ const messageContainerRef = ref<HTMLElement | null>(null);
 
 onMounted(() => {
   initialization();
-  
+
   editedUserName.value = getMyName();
 
   const handleNickNameChange = (event: Event) => {
@@ -57,6 +58,7 @@ onMounted(() => {
 
   onBeforeUnmount(() => {
     document.removeEventListener('changeNickName', handleNickNameChange);
+    onDestroyWaku();
   });
 });
 
