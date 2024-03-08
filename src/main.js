@@ -3,6 +3,7 @@ import App from './App.vue'
 import waku from './plugins/vue-waku';
 
 createApp(App).use(waku, {
+    wakuChannelName: 'my-app',
     availableRooms: ['General', 'Support', 'Off Topic'],
     changeNickMode: 'message',
     allowPrivateChat: false,

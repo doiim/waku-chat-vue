@@ -36,7 +36,7 @@ const myInfo = ref<Participant>({ id: "", name: "User" });
 export const setRoom = async (_room: string) => {
     if (!wakuData.lightNode) return
 
-    const { encoder, decoder } = changeTopic(_room)
+    const { encoder, decoder } = changeTopic(getOptions().wakuChannelName, _room)
     wakuData.ChatEncoder = encoder as Encoder;
     wakuData.ChatDecoder = decoder as Decoder;
 
@@ -116,9 +116,7 @@ export const loadChat = (async () => {
         if (chatState.value.status !== "connected") return;
         if (!wakuData.ChatInterface || !wakuData.ChatEncoder) return
 
-        const protoMessage = wakuData.ChatInterface.create({
-            message: JSON.stringify(msg)
-        });
+        const protoMessage = wakuData.ChatInterface.create(msg);
         const serialisedMessage = wakuData.ChatInterface.encode(protoMessage).finish();
 
         await wakuData.lightNode.lightPush.send(wakuData.ChatEncoder, {
@@ -147,17 +145,17 @@ export const sendMessage = (msgData: { text?: string, emoji?: string }, msgType:
 const messageCallback = (wakuMessage: any) => {
     if (!wakuData.ChatInterface || !wakuMessage.payload) return;
     const messageObj: any = wakuData.ChatInterface.decode(wakuMessage.payload);
-    const parsedMsg = JSON.parse(messageObj.message);
+    if (!messageObj) return
 
-    chatState.value.messageList = [...chatState.value.messageList, parsedMsg]
+    chatState.value.messageList = [...chatState.value.messageList, messageObj]
 
     for (let i = 0; i < chatState.value.participants.length; i++) {
-        if (chatState.value.participants[i].id === parsedMsg.author.id) {
-            chatState.value.participants[i] = parsedMsg.author;
+        if (chatState.value.participants[i].id === messageObj.author.id) {
+            chatState.value.participants[i] = messageObj.author;
             return;
         }
     }
-    chatState.value.participants = [...chatState.value.participants, parsedMsg.author]
+    chatState.value.participants = [...chatState.value.participants, messageObj.author]
 
 };
 

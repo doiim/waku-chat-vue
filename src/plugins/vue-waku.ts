@@ -24,11 +24,26 @@ const plugin = {
 
     app.provide('startWaku', startWaku)
 
+    const ParticipantInterface = new protobuf.Type("Participant")
+      .add(new protobuf.Field("id", 1, "string"))
+      .add(new protobuf.Field("name", 2, "string"))
+
+    const MsgDataInterface = new protobuf.Type("MsgData")
+      .add(new protobuf.Field("text", 1, "string"))
+      .add(new protobuf.Field("emoji", 2, "string"))
+
     // Create a message structure using Protobuf
     const ChatInterface = new protobuf.Type("ChatInterface")
-      .add(new protobuf.Field("timestamp", 1, "uint64"))
-      .add(new protobuf.Field("sender", 2, "string"))
-      .add(new protobuf.Field("message", 3, "string"));
+      .add(new protobuf.Field("id", 1, "string"))
+      .add(new protobuf.Field("author", 2, "Participant",))
+      .add(new protobuf.Field("type", 3, "string"))
+      .add(new protobuf.Field("timestamp", 4, "uint64"))
+      .add(new protobuf.Field("liked", 5, "string"))
+      .add(new protobuf.Field("data", 6, "MsgData"))
+      .add(new protobuf.Field("room", 7, "string"));
+
+    ChatInterface.add(ParticipantInterface)
+    ChatInterface.add(MsgDataInterface)
 
     app.provide('chatInterface', ChatInterface)
     app.provide('chatOptions', options)
@@ -36,13 +51,15 @@ const plugin = {
 
 }
 
+
 export default plugin
 
-export const changeTopic = (_topic: string) => {
+export const changeTopic = (_channel: string, _topic: string) => {
   const topic = _topic.toLowerCase().replace(/\s/g, '');
+  const channel = _topic.toLowerCase().replace(/\s/g, '');
 
   // Choose a content topic
-  const contentTopic = `/doiim/1/${topic}`;
+  const contentTopic = `/${channel}/1/${topic}/proto`;
 
   // Create a message encoder and decoder
   const encoder = createEncoder({
