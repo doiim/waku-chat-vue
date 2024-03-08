@@ -56,7 +56,7 @@ export default plugin
 
 export const changeTopic = (_channel: string, _topic: string) => {
   const topic = _topic.toLowerCase().replace(/\s/g, '');
-  const channel = _topic.toLowerCase().replace(/\s/g, '');
+  const channel = _channel.toLowerCase().replace(/\s/g, '');
 
   // Choose a content topic
   const contentTopic = `/${channel}/1/${topic}/proto`;
