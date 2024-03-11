@@ -5,15 +5,25 @@ import {
   createDecoder,
   createEncoder,
 } from "@waku/sdk";
+import { bootstrap } from "@libp2p/bootstrap";
 
 const plugin = {
   install: async (app: any, options: any) => {
 
     const startWaku = async function () {
+      let libp2p = undefined
+      if (options.wakuPeers.length > 0) {
+        libp2p = {
+          peerDiscovery: [
+            bootstrap({ list: options.wakuPeers }) as any,
+          ],
+        }
+      }
 
       // Bootstrap node using the static peers
       const node = await createLightNode({
-        defaultBootstrap: true
+        defaultBootstrap: true,
+        libp2p,
       });
       await node.start();
 

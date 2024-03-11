@@ -4,6 +4,10 @@ import waku from './plugins/vue-waku';
 
 createApp(App).use(waku, {
     wakuChannelName: 'my-app',
+    wakuPeers: [
+        "/dns4/waku.bitcoin-betting.com/tcp/30304/p2p/16Uiu2HAmNNa9kFsFZKzXSiA16EDs8FEAS12xBCdvSXsgcexfg3iN",
+        "/dns4/waku.bitcoin-betting.com/tcp/8000/wss/p2p/16Uiu2HAmNNa9kFsFZKzXSiA16EDs8FEAS12xBCdvSXsgcexfg3iN"
+    ],
     availableRooms: ['General', 'Support', 'Off Topic'],
     changeNickMode: 'message',
     allowPrivateChat: false,
