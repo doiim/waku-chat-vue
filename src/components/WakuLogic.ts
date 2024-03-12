@@ -35,8 +35,8 @@ const myInfo = ref<Participant>({ id: "", name: "User" });
 
 export const setRoom = async (_room: string) => {
     if (!wakuData.lightNode) return
-
-    const { encoder, decoder } = changeTopic(getOptions().wakuChannelName, _room)
+    const channelName = getOptions().wakuChannelName ? getOptions().wakuChannelName : 'my-app'
+    const { encoder, decoder } = changeTopic(channelName, _room)
     wakuData.ChatEncoder = encoder as Encoder;
     wakuData.ChatDecoder = decoder as Decoder;
 
@@ -100,6 +100,9 @@ export const initialization = () => {
     wakuData.startWaku = inject("startWaku") as () => Promise<LightNode>;
     wakuData.ChatInterface = inject("chatInterface") as protobuf.Type;
     wakuData.ChatOptions = inject("chatOptions") as any;
+    if (wakuData.ChatOptions.availableRooms.length) {
+        wakuData.ChatOptions.availableRooms = ['General']
+    }
 }
 
 export const loadChat = (async () => {

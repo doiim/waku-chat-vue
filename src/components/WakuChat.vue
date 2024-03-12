@@ -120,33 +120,31 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  const props = getOptions()
-  if (!props?.cssConfig) return
-  if (props.cssConfig.primaryColor)
-    computedCss.value.primaryColor = props.cssConfig.primaryColor
-  if (props.cssConfig.primaryColorHover)
-    computedCss.value.primaryColorHover = props.cssConfig.primaryColorHover
-  if (props.cssConfig.primaryTextColor)
-    computedCss.value.primaryTextColor = props.cssConfig.primaryTextColor
-  if (props.cssConfig.secondaryColor)
-    computedCss.value.secondaryColor = props.cssConfig.secondaryColor
-  if (props.cssConfig.secondaryColorHover)
-    computedCss.value.secondaryColorHover = props.cssConfig.secondaryColorHover
-  if (props.cssConfig.secondaryTextColor)
-    computedCss.value.secondaryTextColor = props.cssConfig.secondaryTextColor
-  if (props.cssConfig.backgroundColor)
-    computedCss.value.backgroundColor = props.cssConfig.backgroundColor
+  const props = getOptions();
+  const cssConfig = props?.cssConfig;
 
-  if (props.cssConfig.otherMessageColor)
-    computedCss.value.otherMessageColor = props.cssConfig.otherMessageColor
-  if (props.cssConfig.otherMessageTextColor)
-    computedCss.value.otherMessageTextColor = props.cssConfig.otherMessageTextColor
-  if (props.cssConfig.myMessageColor)
-    computedCss.value.myMessageColor = props.cssConfig.myMessageColor
-  if (props.cssConfig.myMessageTextColor)
-    computedCss.value.myMessageTextColor = props.cssConfig.myMessageTextColor
+  if (!cssConfig) return;
 
-})
+  const cssProperties = [
+    'primaryColor',
+    'primaryColorHover',
+    'primaryTextColor',
+    'secondaryColor',
+    'secondaryColorHover',
+    'secondaryTextColor',
+    'backgroundColor',
+    'otherMessageColor',
+    'otherMessageTextColor',
+    'myMessageColor',
+    'myMessageTextColor',
+  ];
+
+  cssProperties.forEach((property) => {
+    if (cssConfig[property]) {
+      computedCss.value[property] = cssConfig[property];
+    }
+  });
+});
 
 </script>
 
