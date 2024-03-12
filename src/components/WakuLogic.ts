@@ -100,7 +100,7 @@ export const initialization = () => {
     wakuData.startWaku = inject("startWaku") as () => Promise<LightNode>;
     wakuData.ChatInterface = inject("chatInterface") as protobuf.Type;
     wakuData.ChatOptions = inject("chatOptions") as any;
-    if (wakuData.ChatOptions.availableRooms.length) {
+    if (!wakuData.ChatOptions.availableRooms.length) {
         wakuData.ChatOptions.availableRooms = ['General']
     }
 }
