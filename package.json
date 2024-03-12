@@ -10,6 +10,7 @@
     "deploy": "vite build && gh-pages -d dist"
   },
   "dependencies": {
+    "@libp2p/bootstrap": "^10.0.16",
     "@libp2p/interfaces": "^3.3.2",
     "@waku/sdk": "^0.0.22",
     "protobufjs": "^7.2.6",
