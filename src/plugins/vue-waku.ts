@@ -11,20 +11,23 @@ const plugin = {
   install: async (app: any, options: any) => {
 
     const startWaku = async function () {
-      let libp2p = undefined
+      let lightNodeOptions = {}
       if (options.wakuPeers.length > 0) {
-        libp2p = {
-          peerDiscovery: [
-            bootstrap({ list: options.wakuPeers }) as any,
-          ],
+        lightNodeOptions = {
+          libp2p: {
+            peerDiscovery: [
+              bootstrap({ list: options.wakuPeers }) as any,
+            ],
+          }
+        }
+      } else {
+        lightNodeOptions = {
+          defaultBootstrap: true,
         }
       }
 
       // Bootstrap node using the static peers
-      const node = await createLightNode({
-        defaultBootstrap: true,
-        libp2p,
-      });
+      const node = await createLightNode(lightNodeOptions);
       await node.start();
 
       // Wait for a successful peer connection
