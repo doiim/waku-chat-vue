@@ -49,7 +49,7 @@ onMounted(() => {
   const handleNickNameChange = (event: Event) => {
     const newNick = (event as CustomEvent).detail;
 
-    if (getOptions().changeNickMode === 'message' || getOptions().changeNickMode === 'interface') {
+    if (getOptions()?.changeNickMode === 'message' || getOptions()?.changeNickMode === 'interface') {
       setMyName(newNick);
     }
   };
@@ -75,7 +75,7 @@ const saveEditedUserName = () => {
 };
 
 const getRoomName = (room: string) => {
-  let name = getOptions().availableRooms[0];
+  let name = getOptions()?.availableRooms[0];
   getParticipants().forEach(participant => {
     name = room.replace(new RegExp(participant.id, 'g'), participant.name);
   });
@@ -121,7 +121,7 @@ watchEffect(() => {
 
 watchEffect(() => {
   const props = getOptions();
-  const cssConfig = props?.cssConfig;
+  const cssConfig = props?.cssConfig as Record<string, string> | undefined;;
 
   if (!cssConfig) return;
 
@@ -153,7 +153,7 @@ watchEffect(() => {
     <div v-if="isChatOpen" class="chat-container" :class="{ 'open': isChatOpen }">
       <div class="chat-header">
         <div class="user-section">
-          <div v-if="getOptions().changeNickMode === 'interface'" class="user-profile" @click="enterEditMode">
+          <div v-if="getOptions()?.changeNickMode === 'interface'" class="user-profile" @click="enterEditMode">
             <span v-if="!editMode">{{ getMyName() }}</span>
             <input v-model="editedUserName" v-else @blur="exitEditMode" @keypress.enter="saveEditedUserName"
               class="edit-user-input" />
@@ -170,7 +170,7 @@ watchEffect(() => {
           <div class="room-dropdown">
             <button class="dropdown-button">Change Room</button>
             <div class="dropdown-content">
-              <div v-for="availableRoom in getOptions().availableRooms" :key="availableRoom">
+              <div v-for="availableRoom in getOptions()?.availableRooms" :key="availableRoom">
                 <button @click="changeRoomDropdown(availableRoom)">
                   {{ availableRoom }}
                 </button>
@@ -215,286 +215,4 @@ watchEffect(() => {
   </div>
 </template>
 
-<style scoped>
-.room-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.room-dropdown:hover .dropdown-content {
-  display: block;
-}
-
-.dropdown-content {
-  display: none;
-  right: 0;
-  position: absolute;
-  background-color: v-bind('computedCss.primaryColor');
-  min-width: 100%;
-  z-index: 1;
-  max-width: 256px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  border-radius: 16px;
-  border: 2px solid v-bind('computedCss.secondaryColor');
-}
-
-.dropdown-content button {
-  color: v-bind('computedCss.primaryTextColor');
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
-  border: none;
-  background: none;
-  transition: background-color 0.3s ease-in-out;
-  border-radius: 16px;
-}
-
-.dropdown-content button:hover {
-  background-color: v-bind('computedCss.primaryColorHover');
-}
-
-.dropdown-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  color: v-bind('computedCss.primaryTextColor');
-}
-
-.chat-container {
-  width: 368px;
-  height: 592px;
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-  background-color: v-bind('computedCss.secondaryColor');
-  border: 2px solid v-bind('computedCss.primaryColor');
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease-in-out;
-}
-
-.chat-container.open {
-  transform: translateY(0);
-}
-
-.chat-header {
-  background-color: v-bind('computedCss.primaryColor');
-  color: v-bind('computedCss.primaryTextColor');
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  flex-direction: column;
-}
-
-.user-section {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.room-section {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  height: 48px;
-  border: 2px solid v-bind('computedCss.secondaryColor');
-  padding: 0px 8px;
-  width: 100%;
-  margin-right: 8px;
-  cursor: pointer;
-  background-color: v-bind('computedCss.primaryColor');
-  transition: background-color 0.3s ease-in-out;
-  border-radius: 16px;
-}
-
-.user-profile:hover {
-  background-color: v-bind('computedCss.primaryColorHover');
-}
-
-.non-edit {
-  cursor: default;
-}
-
-.edit-user-input {
-  font-size: 14px;
-  border: 1px solid v-bind('computedCss.primaryColor');
-  border-radius: 16px;
-  margin: 4px 0px;
-  height: 38px;
-  width: 100%;
-}
-
-.room-info {
-  margin-right: 10px;
-}
-
-.room-name {
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.chat-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-  background-color: v-bind('computedCss.backgroundColor');
-}
-
-.message-info {
-  display: flex;
-  align-items: center;
-}
-
-.chat-footer {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  background-color: v-bind('computedCss.backgroundColor');
-}
-
-.message-input {
-  font-size: 18px;
-  flex: 1;
-  height: 32px;
-  padding: 16px;
-  border: 2px solid v-bind('computedCss.primaryColor');
-  color: v-bind('computedCss.primaryColor');
-  background-color: v-bind('computedCss.backgroundColor');
-  border-radius: 16px;
-}
-
-.open-button,
-.spinner,
-.minimize-button,
-.send-button {
-  width: 64px;
-  height: 64px;
-  background-color: v-bind('computedCss.primaryColor');
-  color: v-bind('computedCss.primaryTextColor');
-  border-radius: 50%;
-  border: 2px solid v-bind('computedCss.secondaryColor');
-  transition: background-color 0.3s ease-in-out;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.open-button,
-.minimize-button,
-.send-button {
-  cursor: pointer;
-}
-
-.open-button:hover,
-.minimize-button:hover,
-.send-button:hover {
-  background-color: v-bind('computedCss.primaryColorHover');
-}
-
-.open-button,
-.spinner {
-  position: fixed;
-  right: 34px;
-  bottom: 36px;
-}
-
-
-.spinner div {
-  width: 16px;
-  height: 16px;
-  border: 4px solid v-bind('computedCss.secondaryColor');
-  border-top: 4px solid transparent;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-.minimize-button {
-  width: 32px;
-  height: 32px;
-}
-
-.own-message .user-name-baloon {
-  color: v-bind('computedCss.myMessageTextColor');
-}
-
-.own-message div {
-  align-self: start;
-}
-
-.own-message .message {
-  background-color: v-bind('computedCss.myMessageColor');
-  color: v-bind('computedCss.myMessageTextColor');
-}
-
-.user-name-baloon {
-  font-weight: bold;
-  width: 100%;
-  margin-left: 4px;
-  text-align: start;
-  color: v-bind('computedCss.primaryColor');
-}
-
-.user-name-baloon-btn {
-  background: none;
-  border: none;
-  color: v-bind('computedCss.secondaryColor');
-  cursor: pointer;
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-.message-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  margin-bottom: 10px;
-}
-
-.message-container div {
-  align-self: end;
-}
-
-.message {
-  min-width: 96px;
-  max-width: 67%;
-  padding: 10px;
-  border-radius: 16px;
-  background-color: v-bind('computedCss.otherMessageColor');
-  color: v-bind('computedCss.otherMessageTextColor');
-}
-
-.timestamp {
-  font-size: 12px;
-  color: v-bind('computedCss.primaryColor');
-}
-
-.message-content {
-  word-wrap: break-word;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-</style>
+<style lang="css" src="./WakuChat.css" />
