@@ -5,8 +5,10 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
     plugins: [
         vue(),
-
     ],
+    css: {
+        modules: { scopeBehaviour: 'global', },
+    },
     input: 'src/index.ts',
     base: '/waku-chat-vue/',
     resolve: {
