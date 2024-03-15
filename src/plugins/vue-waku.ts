@@ -1,4 +1,4 @@
-import * as protobuf from "protobufjs";
+import { Type, Field } from "protobufjs";
 import {
   createLightNode,
   waitForRemotePeer,
@@ -34,23 +34,23 @@ const plugin = {
 
     app.provide('startWaku', startWaku)
 
-    const ParticipantInterface = new protobuf.Type("Participant")
-      .add(new protobuf.Field("id", 1, "string"))
-      .add(new protobuf.Field("name", 2, "string"))
+    const ParticipantInterface = new Type("Participant")
+      .add(new Field("id", 1, "string"))
+      .add(new Field("name", 2, "string"))
 
-    const MsgDataInterface = new protobuf.Type("MsgData")
-      .add(new protobuf.Field("text", 1, "string"))
-      .add(new protobuf.Field("emoji", 2, "string"))
+    const MsgDataInterface = new Type("MsgData")
+      .add(new Field("text", 1, "string"))
+      .add(new Field("emoji", 2, "string"))
 
     // Create a message structure using Protobuf
-    const ChatInterface = new protobuf.Type("ChatInterface")
-      .add(new protobuf.Field("id", 1, "string"))
-      .add(new protobuf.Field("author", 2, "Participant",))
-      .add(new protobuf.Field("type", 3, "string"))
-      .add(new protobuf.Field("timestamp", 4, "uint64"))
-      .add(new protobuf.Field("liked", 5, "string"))
-      .add(new protobuf.Field("data", 6, "MsgData"))
-      .add(new protobuf.Field("room", 7, "string"));
+    const ChatInterface = new Type("ChatInterface")
+      .add(new Field("id", 1, "string"))
+      .add(new Field("author", 2, "Participant",))
+      .add(new Field("type", 3, "string"))
+      .add(new Field("timestamp", 4, "uint64"))
+      .add(new Field("liked", 5, "string"))
+      .add(new Field("data", 6, "MsgData"))
+      .add(new Field("room", 7, "string"));
 
     ChatInterface.add(ParticipantInterface)
     ChatInterface.add(MsgDataInterface)

@@ -28,7 +28,4 @@
         "src/**/*.vue",
         "vite.config.ts"
     ],
-    "exclude": [
-        "node_modules/protobufjs/minimal.js"
-    ]
 }
