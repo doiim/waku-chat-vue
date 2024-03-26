@@ -15,7 +15,7 @@
       <button @click="changeName">Change Name</button>
     </div>
 
-    <ChatComponent :externalUserId="externalId" />
+    <WakuChatVuePlugin :externalUserId="externalId" />
   </div>
 </template>
 

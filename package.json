@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "rm -rf ./node_modules/.vite/ && vite",
     "build": "vue-tsc --skipLibCheck && vite build",
     "preview": "vite preview",
     "deploy": "vite build && gh-pages -d dist"
