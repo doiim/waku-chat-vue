@@ -5,14 +5,19 @@
 
     <div class="input-container">
       <label for="idInput">ID:</label>
-      <input type="text" v-model="idInput" id="idInput">
-      <button @click="changeId">Change ID</button>
+      <div>
+        <input type="text" v-model="idInput" id="idInput">
+        <button @click="changeId">Change ID</button>
+      </div>
     </div>
 
     <div class="input-container">
       <label for="nameInput">Name:</label>
-      <input type="text" v-model="nameInput" id="nameInput" placeholder="Type your name">
-      <button @click="changeName">Change Name</button>
+      <div>
+        <input type="text" v-model="nameInput" id="nameInput" placeholder="Type your name">
+        <button @click="changeName">Change Name</button>
+      </div>
+
     </div>
 
     <WakuChatVuePlugin :externalUserId="externalId" />
@@ -50,38 +55,46 @@ body {
 }
 
 h1 {
-  color: #333;
+  color: rgba(31, 41, 55, 1);
 }
 
 p {
-  color: #666;
+  color: rgba(107, 114, 128, 1);
 }
 
 .input-container {
   margin-bottom: 20px;
 }
 
+.input-container div {
+  width: 100%;
+  display: flex;
+}
+
 label {
   display: block;
   margin-bottom: 5px;
-  color: #333;
+  color: rgba(156, 163, 175, 1);
 }
 
 input[type="text"] {
   width: 100%;
   padding: 8px;
-  margin-bottom: 15px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 8px;
   box-sizing: border-box;
 }
 
 button {
+  height: auto;
+  margin-left: 16px;
+  width: 200px;
   padding: 10px 20px;
+  font-size: 14px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
