@@ -5,7 +5,7 @@ import WakuChatVuePlugin from '@doiim/waku-chat-vue-plugin';
 createApp(App).use(WakuChatVuePlugin, {
     wakuChannelName: 'my-app-name',
     wakuPeers: [],
-    availableRooms: ['Trollbox', 'Support'],
+    availableRooms: ['General', 'Support'],
     changeNickMode: 'user',
     allowPrivateChat: false,
 }).mount('#app');
