@@ -1,5 +1,11 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import waku from './plugins/vue-waku';
+import WakuChatVuePlugin from '@doiim/waku-chat-vue-plugin';
 
-createApp(App).use(waku).mount('#app')
+createApp(App).use(WakuChatVuePlugin, {
+    wakuChannelName: 'my-app-name',
+    wakuPeers: [],
+    availableRooms: ['General', 'Support'],
+    changeNickMode: 'user',
+    allowPrivateChat: false,
+}).mount('#app');
