@@ -8,4 +8,6 @@ createApp(App).use(WakuChatVuePlugin, {
     availableRooms: ['General', 'Support'],
     changeNickMode: 'user',
     allowPrivateChat: false,
+    userChangeNick: true,
+    showSettings: true
 }).mount('#app');

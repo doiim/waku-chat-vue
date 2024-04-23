@@ -20,7 +20,7 @@
 
     </div>
 
-    <WakuChatVuePlugin :externalUserId="externalId" />
+    <WakuChatVuePlugin :externalUserId="externalId" :externalUserName="externalName" />
   </div>
 </template>
 
@@ -31,13 +31,14 @@ const idInput = ref('thisIsMyIdDefinedByMyApplication');
 const nameInput = ref('');
 
 const externalId = ref('thisIsMyIdDefinedByMyApplication');
+const externalName = ref('');
 
 const changeId = () => {
   externalId.value = idInput.value
 };
 
 const changeName = () => {
-  document.dispatchEvent(new CustomEvent('changeNickName', { detail: nameInput.value }));
+  externalName.value = nameInput.value
 };
 </script>
 
