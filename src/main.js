@@ -9,5 +9,7 @@ createApp(App).use(WakuChatVuePlugin, {
     changeNickMode: 'user',
     allowPrivateChat: false,
     userChangeNick: true,
-    showSettings: true
+    showSettings: true,
+    messageAgeToDownload: (4 * 24 + 7) * 60 * 60 * 1000,
+    disconnectDelay:5*1000
 }).mount('#app');

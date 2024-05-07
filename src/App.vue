@@ -20,7 +20,17 @@
 
     </div>
 
-    <WakuChatVuePlugin :externalUserId="externalId" :externalUserName="externalName" />
+    <div class="input-container">
+      <label for="nameInput">Message:</label>
+      <div>
+        <input type="text" :disabled="true" v-model="message" id="nameInput"
+          placeholder="Messages that comes from chat">
+      </div>
+
+    </div>
+
+    <WakuChatVuePlugin :externalUserId="externalId" :externalUserName="externalName" :onOpen="onOpen" :onClose="onClose"
+      :onConnect="onConnect" :onDisconnect="onDisconnect" />
   </div>
 </template>
 
@@ -32,6 +42,25 @@ const nameInput = ref('');
 
 const externalId = ref('thisIsMyIdDefinedByMyApplication');
 const externalName = ref('');
+
+const message = ref('');
+
+
+const onConnect = () => {
+  message.value = 'Connected to the Chat'
+};
+
+const onDisconnect = () => {
+  message.value = 'Disconnected to the Chat'
+};
+
+const onOpen = () => {
+  message.value = 'Opened Chat'
+};
+
+const onClose = () => {
+  message.value = 'Closed Chat'
+};
 
 const changeId = () => {
   externalId.value = idInput.value
