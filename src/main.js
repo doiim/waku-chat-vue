@@ -11,5 +11,15 @@ createApp(App).use(WakuChatVuePlugin, {
     userChangeNick: true,
     showSettings: true,
     messageAgeToDownload: (4 * 24 + 7) * 60 * 60 * 1000,
-    disconnectDelay:5*1000
+    disconnectDelay:5*60*1000,
+    styleConfig:{
+        colors:{
+            light:{
+                primary:'rgba(41, 79, 204, 1)',
+            },
+            dark:{
+                primary:'rgba(135, 79, 204, 1)',
+            }
+        }
+    }
 }).mount('#app');
