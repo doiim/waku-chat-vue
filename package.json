@@ -10,7 +10,7 @@
     "deploy": "vite build && gh-pages -d dist"
   },
   "dependencies": {
-    "@doiim/waku-chat-vue-plugin": "^0.8.20",
+    "@doiim/waku-chat-vue-plugin": "^0.8.21",
     "vue": "^3.4.15"
   },
   "devDependencies": {
