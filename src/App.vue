@@ -28,6 +28,19 @@
       </div>
 
       <div class="input-container">
+        <label for="typeInput">Type:</label>
+        <div>
+          <input
+            type="text"
+            v-model="typeInput"
+            id="typeInput"
+            placeholder="Type your user type"
+          />
+          <button @click="changeType">Change Type</button>
+        </div>
+      </div>
+
+      <div class="input-container">
         <label for="messageInput">Message:</label>
         <div>
           <input
@@ -153,6 +166,7 @@
       <WakuChatVuePlugin
         :externalUserId="externalId"
         :externalUserName="externalName"
+        :externalUserType="externalType"
         :onOpen="onOpen"
         :onClose="onClose"
         :onConnect="onConnect"
@@ -170,9 +184,11 @@ import { ref, computed } from "vue";
 
 const idInput = ref("thisIsMyIdDefinedByMyApplication");
 const nameInput = ref("");
+const typeInput = ref("");
 
 const externalId = ref("thisIsMyIdDefinedByMyApplication");
 const externalName = ref("");
+const externalType = ref("");
 
 const message = ref("");
 const chatPosValue = ref({ vertical: 1, horizontal: 1 });
@@ -209,6 +225,10 @@ const changeId = () => {
 
 const changeName = () => {
   externalName.value = nameInput.value;
+};
+
+const changeType = () => {
+  externalType.value = typeInput.value;
 };
 
 const toggleTheme = () => {
