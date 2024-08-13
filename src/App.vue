@@ -54,6 +54,9 @@
       </div>
 
       <button class="theme-button" @click="toggleTheme">Toggle Theme</button>
+      <button class="switch-button" @click="switchChat" :disabled="loadingChat">
+        {{ chatOpened ? "Close Chat" : "Open Chat" }}
+      </button>
 
       <div class="position-config">
         <div>
@@ -164,6 +167,7 @@
       </div>
 
       <WakuChatVuePlugin
+        ref="wakuChatRef"
         :externalUserId="externalId"
         :externalUserName="externalName"
         :externalUserType="externalType"
@@ -181,6 +185,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
+const wakuChatRef = ref<any>(null);
+const chatOpened = ref(false);
+const loadingChat = ref(false);
 
 const idInput = ref("thisIsMyIdDefinedByMyApplication");
 const nameInput = ref("");
@@ -213,10 +220,18 @@ const onDisconnect = () => {
 
 const onOpen = () => {
   message.value = "Opened Chat";
+  chatOpened.value = true;
+  setTimeout(() => {
+    loadingChat.value = false;
+  }, 0);
 };
 
 const onClose = () => {
   message.value = "Closed Chat";
+  chatOpened.value = false;
+  setTimeout(() => {
+    loadingChat.value = false;
+  }, 0);
 };
 
 const changeId = () => {
@@ -239,6 +254,15 @@ const toggleTheme = () => {
     theme.value = "light";
     chatTheme.value = "light";
   }
+};
+
+const switchChat = () => {
+  if (wakuChatRef.value && chatOpened.value) {
+    wakuChatRef.value.closeChat();
+  } else if (wakuChatRef.value && !chatOpened.value) {
+    wakuChatRef.value.openChat();
+  }
+  loadingChat.value = true;
 };
 
 const setChatPos = (position: string) => {
@@ -367,8 +391,22 @@ button {
 }
 
 .theme-button {
-  width: 100%;
+  width: 68%;
   margin-left: 0px;
+}
+
+.switch-button {
+  width: 28%;
+  margin-left: 4%;
+}
+
+.switch-button:disabled {
+  background-color: gray;
+  pointer-events: none;
+}
+
+.switch-button:disabled:hover {
+  background-color: gray;
 }
 
 .position-config {
