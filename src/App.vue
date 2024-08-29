@@ -60,7 +60,10 @@
 
       <div class="position-config">
         <div>
-          <h2>Chat Position</h2>
+          <div class="pos-config-group">
+            <h2>Chat Position</h2>
+            <h2>Animation</h2>
+          </div>
           <div class="pos-config-group">
             <div class="pos-buttons">
               <button
@@ -90,6 +93,34 @@
                 Bottom
               </button>
             </div>
+            <div class="pos-buttons">
+              <button
+                :class="{ active: animation === 'up' }"
+                @click="setAnimation('up')"
+              >
+                Up
+              </button>
+              <div>
+                <button
+                  :class="{ active: animation === 'left' }"
+                  @click="setAnimation('left')"
+                >
+                  Left
+                </button>
+                <button
+                  :class="{ active: animation === 'right' }"
+                  @click="setAnimation('right')"
+                >
+                  Right
+                </button>
+              </div>
+              <button
+                :class="{ active: animation === 'down' }"
+                @click="setAnimation('down')"
+              >
+                Down
+              </button>
+            </div>
           </div>
           <div class="pos-config-group">
             <div class="pos-buttons">
@@ -106,6 +137,24 @@
                 min="0"
                 max="100"
                 v-model="chatPosValue.horizontal"
+              />
+            </div>
+            <div class="pos-buttons">
+              <label>Width Expression: </label>
+              <input
+                class="size-input"
+                type="text"
+                v-model="widthInput"
+                id="widthInput"
+                placeholder="360px"
+              />
+              <label>Height Expression: </label>
+              <input
+                class="size-input"
+                type="text"
+                v-model="heightInput"
+                id="heightInput"
+                placeholder="576px"
               />
             </div>
           </div>
@@ -178,6 +227,8 @@
         :theme="chatTheme"
         :chatPos="computedChatPos"
         :balloonPos="computedBalloonPos"
+        :animationDirection="animation"
+        :chatSize="{ width: widthInput, height: heightInput }"
       />
     </div>
   </div>
@@ -209,6 +260,11 @@ const chatPosLeftRight = ref("right");
 
 const balloonPosTopBottom = ref("bottom");
 const balloonPosLeftRight = ref("right");
+
+const widthInput = ref("360px");
+const heightInput = ref("576px");
+
+const animation = ref("up");
 
 const onConnect = () => {
   message.value = "Connected to the Chat";
@@ -263,6 +319,10 @@ const switchChat = () => {
     wakuChatRef.value.openChat();
   }
   loadingChat.value = true;
+};
+
+const setAnimation = (position: string) => {
+  animation.value = position;
 };
 
 const setChatPos = (position: string) => {
@@ -417,12 +477,15 @@ button {
 
 .pos-config-group {
   margin-bottom: 20px;
+  display: flex;
+  justify-content: space-around;
 }
 
 .pos-buttons {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: fit-content;
 }
 
 .pos-buttons button {
@@ -444,5 +507,9 @@ button {
   margin: 0 5px;
   min-width: 30px;
   text-align: center;
+}
+
+.size-input {
+  width: 120px !important;
 }
 </style>
