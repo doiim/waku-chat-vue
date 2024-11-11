@@ -12,7 +12,7 @@
         <label for="idInput">ID:</label>
         <div>
           <input type="text" v-model="idInput" id="idInput" />
-          <button @click="changeId">Change ID</button>
+          <button @click="changeId" style="margin-left: 16px">Change ID</button>
         </div>
       </div>
 
@@ -25,7 +25,7 @@
             id="nameInput"
             placeholder="Type your name"
           />
-          <button @click="changeName">Change Name</button>
+          <button @click="changeName" style="margin-left: 16px">Change Name</button>
         </div>
       </div>
 
@@ -38,7 +38,7 @@
             id="typeInput"
             placeholder="Type your user type"
           />
-          <button @click="changeType">Change Type</button>
+          <button @click="changeType" style="margin-left: 16px">Change Type</button>
         </div>
       </div>
 
@@ -75,7 +75,7 @@
           </label>
         </div>
 
-        <div class="fetch-settings">
+        <div class="flex">
           <div class="input-container">
             <label for="fetchLimitInput">Messages {{fetchMsgsOnScroll ? 'per fetch' : 'to fetch'}}:</label>
             <div>
@@ -142,11 +142,18 @@
         </div>
       </div>
       <hr class="split-section">
+      <h3>External Events:</h3><br/>
+      <div class="flex">
+        <button class="half-size button" @click="switchChat" :disabled="loadingChat">
+          {{ chatOpened ? "Close Chat" : "Open Chat" }}
+        </button>
+        <button class="half-size button" @click="loadChatOnBackground" :disabled="loadingChat">
+          Load chat on background
+        </button>
+      </div>
+      <hr class="split-section">
       <h3>Customizations:</h3><br/>
-      <button class="theme-button" @click="toggleTheme">Toggle Theme</button>
-      <button class="switch-button" @click="switchChat" :disabled="loadingChat">
-        {{ chatOpened ? "Close Chat" : "Open Chat" }}
-      </button>
+      <button class="full-size button" @click="toggleTheme">Toggle Theme</button>
 
       <div class="position-config">
         <div>
@@ -414,6 +421,10 @@ const toggleTheme = () => {
   }
 };
 
+const loadChatOnBackground = () => {
+  wakuChatRef.value.connectChat();
+};
+
 const switchChat = () => {
   if (wakuChatRef.value && chatOpened.value) {
     wakuChatRef.value.closeChat();
@@ -477,7 +488,7 @@ const updateMessageAge = () => {
 <style scoped>
 
 .app {
-  height: 100%;
+  padding-bottom: 100px;
 }
 
 .configuration {
@@ -504,6 +515,26 @@ hr.split-section {
 input[type="text"],
 button {
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.flex {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.flex .input-container {
+  flex: 1;
+}
+
+.full-size {
+  width: 100%;
+}
+.half-size {
+  width: 50%;
+}
+.third-size {
+  width: 33%;
 }
 
 .light {
@@ -546,6 +577,13 @@ button {
   background-color: #1d4ed8;
 }
 
+
+.light button:disabled,
+.dark button:disabled  {
+  filter: grayscale();
+  pointer-events: none;
+}
+
 .input-container {
   margin-bottom: 20px;
 }
@@ -576,32 +614,12 @@ input[type="range"] {
 
 button {
   height: auto;
-  margin-left: 16px;
   width: 200px;
   padding: 10px 20px;
   font-size: 14px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-}
-
-.theme-button {
-  width: 68%;
-  margin-left: 0px;
-}
-
-.switch-button {
-  width: 28%;
-  margin-left: 4%;
-}
-
-.switch-button:disabled {
-  background-color: gray;
-  pointer-events: none;
-}
-
-.switch-button:disabled:hover {
-  background-color: gray;
 }
 
 .position-config {
@@ -722,16 +740,6 @@ input:checked + .slider:before {
 
 .dark .slider {
   background-color: #4b5563;
-}
-
-.fetch-settings {
-  display: flex;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.fetch-settings .input-container {
-  flex: 1;
 }
 
 .message-age-selector select {
