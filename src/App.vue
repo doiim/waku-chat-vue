@@ -5,6 +5,8 @@
       <p>
         This is a simple page test with the ability to change your name and id.
       </p>
+      <hr class="split-section">
+      <h3>User Settings:</h3><br/>
 
       <div class="input-container">
         <label for="idInput">ID:</label>
@@ -53,6 +55,94 @@
         </div>
       </div>
 
+      <hr class="split-section">
+      <h3>History Settings:</h3><br/>
+
+      <div class="behaviour-controls">
+   
+
+        <div class="toggle-container">
+          <label class="toggle-label">
+            Load messages on scroll
+            <div class="toggle-switch">
+              <input 
+                type="checkbox" 
+                v-model="fetchMsgsOnScroll"
+                @change="updateFetchMsgsOnScroll"
+              >
+              <span class="slider"></span>
+            </div>
+          </label>
+        </div>
+
+        <div class="fetch-settings">
+          <div class="input-container">
+            <label for="fetchLimitInput">Messages {{fetchMsgsOnScroll ? 'per fetch' : 'to fetch'}}:</label>
+            <div>
+              <input
+                type="number"
+                v-model="fetchLimitInput"
+                id="fetchLimitInput"
+                :placeholder="fetchMsgsOnScroll ? '10' : '100'"
+              />
+            </div>
+          </div>
+          <div class="input-container">
+            <label for="maxAttemptsInput">Max {{fetchMsgsOnScroll ? 'fetch attempts' : 'attempts'}}:</label>
+            <div>
+              <input
+                type="number"
+                v-model="maxAttemptsInput"
+                id="maxAttemptsInput"
+                placeholder="3"
+              />
+            </div>
+          </div>
+          <div v-if="fetchMsgsOnScroll" class="input-container">
+            <label for="fetchTotalLimitInput">Max total messages:</label>
+            <div>
+              <input
+                type="text"
+                v-model="fetchTotalLimitInput"
+                id="fetchTotalLimitInput"
+                placeholder="0 = Full History"
+              />
+            </div>
+          </div>
+          <div v-if="!fetchMsgsOnScroll"  class="input-container message-age-selector">
+            <label for="messageAgeSelect">Time Range:</label>
+            <div>
+              <select 
+                v-model="selectedMessageAge" 
+                id="messageAgeSelect"
+                @change="updateMessageAge"
+              >
+                <option value="1">Last 24 hours</option>
+                <option value="3">Last 3 days</option>
+                <option value="7">Last 7 days</option>
+                <option value="14">Last 2 weeks</option>
+                <option value="30">Last 30 days</option>
+                <option value="custom">Custom...</option>
+              </select>
+            </div>
+          </div>
+          <div v-if="!fetchMsgsOnScroll && selectedMessageAge === 'custom'" class="input-container" >
+            <label for="customDays">Nº of days:</label>
+            <div>
+              <input
+                type="number"
+                v-model="customDays"
+                id="customDays"
+                min="1"
+                max="365"
+                @change="updateMessageAge"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr class="split-section">
+      <h3>Customizations:</h3><br/>
       <button class="theme-button" @click="toggleTheme">Toggle Theme</button>
       <button class="switch-button" @click="switchChat" :disabled="loadingChat">
         {{ chatOpened ? "Close Chat" : "Open Chat" }}
@@ -229,13 +319,17 @@
         :balloonPos="computedBalloonPos"
         :animationDirection="animation"
         :chatSize="{ width: widthInput, height: heightInput }"
+        :fetchMsgsOnScroll="fetchMsgsOnScroll"
+        :fetchMaxAttempts="parseInt(maxAttemptsInput)"
+        :fetchTotalLimit="parseInt(fetchTotalLimitInput)"
+        :fetchLimit="parseInt(fetchLimitInput)"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, nextTick } from "vue";
 const wakuChatRef = ref<any>(null);
 const chatOpened = ref(false);
 const loadingChat = ref(false);
@@ -265,6 +359,14 @@ const widthInput = ref("360px");
 const heightInput = ref("576px");
 
 const animation = ref("up");
+
+const fetchMsgsOnScroll = ref(true);
+const maxAttemptsInput = ref();
+const fetchLimitInput = ref();
+const fetchTotalLimitInput = ref();
+
+const selectedMessageAge = ref('1');
+const customDays = ref(1);
 
 const onConnect = () => {
   message.value = "Connected to the Chat";
@@ -350,9 +452,30 @@ const computedBalloonPos = computed(() => ({
   [balloonPosTopBottom.value]: `${balloonPosValue.value.vertical}%`,
   [balloonPosLeftRight.value]: `${balloonPosValue.value.horizontal}%`,
 }));
+
+const updateFetchMsgsOnScroll = async () => {
+  await nextTick();
+  if (wakuChatRef.value?.setFetchMsgsOnScroll) {
+    wakuChatRef.value.setFetchMsgsOnScroll(fetchMsgsOnScroll.value);
+  }
+  if(fetchMsgsOnScroll.value == true) {
+    wakuChatRef.value.setMessageAgeToDownload(undefined);
+  }
+};
+
+const updateMessageAge = () => {
+  if (wakuChatRef.value?.setMessageAgeToDownload) {
+    const days = selectedMessageAge.value === 'custom' 
+      ? customDays.value 
+      : parseInt(selectedMessageAge.value);
+    const milliseconds = days * 24 * 60 * 60 * 1000;
+    wakuChatRef.value.setMessageAgeToDownload(milliseconds);
+  }
+};
 </script>
 
 <style scoped>
+
 .app {
   height: 100%;
 }
@@ -369,6 +492,15 @@ label {
   transition: color 0.3s ease;
 }
 
+hr.split-section {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0));
+    padding-top: 2px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 input[type="text"],
 button {
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -379,7 +511,8 @@ button {
   color: rgba(31, 41, 55, 1);
 }
 
-.light input[type="text"] {
+.light input[type="text"],
+.light input[type="number"] {
   background-color: #fff;
   color: #000;
 }
@@ -398,7 +531,8 @@ button {
   color: rgba(209, 213, 219, 1);
 }
 
-.dark input[type="text"] {
+.dark input[type="text"],
+.dark input[type="number"] {
   background-color: #374151;
   color: #d1d5db;
 }
@@ -426,7 +560,8 @@ label {
   margin-bottom: 5px;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="number"] {
   width: 100%;
   padding: 8px;
   border: 1px solid #ccc;
@@ -511,5 +646,114 @@ button {
 
 .size-input {
   width: 120px !important;
+}
+
+.behaviour-controls {
+  margin: 20px 0;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+  margin-left: 16px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.light input:checked + .slider {
+  background-color: #007bff;
+}
+
+.dark input:checked + .slider {
+  background-color: #2563eb;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.light .slider {
+  background-color: #ccc;
+}
+
+.dark .slider {
+  background-color: #4b5563;
+}
+
+.fetch-settings {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.fetch-settings .input-container {
+  flex: 1;
+}
+
+.message-age-selector select {
+  width: 100%;
+  padding: 8px;
+  padding-right: 24px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
+  -webkit-appearance: menulist;  /* For Safari */
+  -moz-appearance: menulist;     /* For Firefox */
+  appearance: menulist;          /* Standard */
+}
+
+.light .message-age-selector select {
+  --input-bg-color: #fff;
+  --text-color: #000;
+}
+
+.dark .message-age-selector select {
+  --input-bg-color: #374151;
+  --text-color: #d1d5db;
 }
 </style>

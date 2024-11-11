@@ -11,7 +11,6 @@ createApp(App)
     allowPrivateChat: false,
     userChangeNick: true,
     showSettings: true,
-    messageAgeToDownload: (4 * 24 + 7) * 60 * 60 * 1000,
     disconnectDelay: 5 * 60 * 1000,
     styleConfig: {
       colors: {
@@ -23,5 +22,7 @@ createApp(App)
         },
       },
     },
+    // example of call
+    // messageAgeToDownload: (4 * 24 + 7) * 60 * 60 * 1000
   })
   .mount("#app");
