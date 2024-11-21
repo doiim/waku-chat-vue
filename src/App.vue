@@ -144,11 +144,17 @@
       <hr class="split-section">
       <h3>External Events:</h3><br/>
       <div class="flex">
-        <button class="half-size button" @click="switchChat" :disabled="loadingChat">
+        <button class="third-size button" @click="switchChat" :disabled="loadingChat"
+          title="Open or close the chat using your own UI">
           {{ chatOpened ? "Close Chat" : "Open Chat" }}
         </button>
-        <button class="half-size button" @click="loadChatOnBackground" :disabled="loadingChat">
-          Load chat on background
+        <button class="third-size button" @click="loadChatOnBackground" :disabled="loadingChat"
+          title="Call it in vue's final lyfecycle activated()">
+          Load on background
+        </button>
+        <button class="third-size button black" @click="switchDebug" :disabled="loadingChat"
+          title="Console messages will be printed on devmode">
+          {{ debugMode ? "Turn Off" : "Turn On" }} Debugger
         </button>
       </div>
       <hr class="split-section">
@@ -314,6 +320,7 @@
 
       <WakuChatVuePlugin
         ref="wakuChatRef"
+        :debugMode="debugMode"
         :externalUserId="externalId"
         :externalUserName="externalName"
         :externalUserType="externalType"
@@ -330,6 +337,7 @@
         :fetchMaxAttempts="parseInt(maxAttemptsInput)"
         :fetchTotalLimit="parseInt(fetchTotalLimitInput)"
         :fetchLimit="parseInt(fetchLimitInput)"
+        :messageAgeToDownload="messageAge"
       />
     </div>
   </div>
@@ -338,6 +346,7 @@
 <script setup lang="ts">
 import { ref, computed, nextTick } from "vue";
 const wakuChatRef = ref<any>(null);
+const debugMode = ref(false);
 const chatOpened = ref(false);
 const loadingChat = ref(false);
 
@@ -367,6 +376,7 @@ const heightInput = ref("576px");
 
 const animation = ref("up");
 
+
 const fetchMsgsOnScroll = ref(true);
 const maxAttemptsInput = ref();
 const fetchLimitInput = ref();
@@ -374,6 +384,7 @@ const fetchTotalLimitInput = ref();
 
 const selectedMessageAge = ref('1');
 const customDays = ref(1);
+const messageAge = ref<number| undefined>(undefined);
 
 const onConnect = () => {
   message.value = "Connected to the Chat";
@@ -434,6 +445,12 @@ const switchChat = () => {
   loadingChat.value = true;
 };
 
+const switchDebug = () => {
+  if (wakuChatRef.value) {
+    debugMode.value = !debugMode.value;
+  }
+};
+
 const setAnimation = (position: string) => {
   animation.value = position;
 };
@@ -466,22 +483,19 @@ const computedBalloonPos = computed(() => ({
 
 const updateFetchMsgsOnScroll = async () => {
   await nextTick();
-  if (wakuChatRef.value?.setFetchMsgsOnScroll) {
-    wakuChatRef.value.setFetchMsgsOnScroll(fetchMsgsOnScroll.value);
-  }
-  if(fetchMsgsOnScroll.value == true) {
-    wakuChatRef.value.setMessageAgeToDownload(undefined);
+  if(fetchMsgsOnScroll.value == false) {
+    updateMessageAge();
+  }else{
+    messageAge.value = undefined;
   }
 };
 
 const updateMessageAge = () => {
-  if (wakuChatRef.value?.setMessageAgeToDownload) {
-    const days = selectedMessageAge.value === 'custom' 
-      ? customDays.value 
-      : parseInt(selectedMessageAge.value);
-    const milliseconds = days * 24 * 60 * 60 * 1000;
-    wakuChatRef.value.setMessageAgeToDownload(milliseconds);
-  }
+  const days = selectedMessageAge.value === 'custom' 
+    ? customDays.value 
+    : parseInt(selectedMessageAge.value);
+  const milliseconds = days * 24 * 60 * 60 * 1000;
+  messageAge.value = milliseconds;
 };
 </script>
 
